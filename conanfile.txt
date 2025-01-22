@@ -1,0 +1,12 @@
+[requires]
+glfw/3.4
+glew/2.2.0
+glm/cci.20230113
+stb/cci.20240531
+
+[generators]
+cmake
+
+[options]
+glfw:shared=True
+glew:shared=True
