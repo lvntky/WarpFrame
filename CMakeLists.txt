@@ -11,10 +11,12 @@ find_package(glfw3 REQUIRED)
 find_package(glad REQUIRED)
 find_package(glm REQUIRED)
 find_package(imgui REQUIRED)
+find_package(spdlog REQUIRED)
 
 # Create executable
 add_executable(${PROJECT_NAME}
-    src/main.cpp
+    src/main.cc
+    src/logger.cc
     # Add your other source files here
 )
 
@@ -24,6 +26,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     glad::glad
     glm::glm
     imgui::imgui
+    spdlog::spdlog
 )
 
 # Include directories

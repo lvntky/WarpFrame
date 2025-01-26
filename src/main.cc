@@ -1,7 +1,12 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include "../include/warpframe/logger/logger.h"
 
 int main() {
+    Logger::init();
+    Logger::getLogger()->error("WarpFrame initialized.");
+    
+    /*
     // Initialize GLFW
     if (!glfwInit()) {
         std::cerr << "Failed to initialize GLFW!" << std::endl;
@@ -38,6 +43,7 @@ int main() {
     // Clean up and terminate GLFW
     glfwDestroyWindow(window);
     glfwTerminate();
+    */
 
     return 0;
 }

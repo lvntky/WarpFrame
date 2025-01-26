@@ -8,7 +8,7 @@ This list is categorized into **Core Engine**, **Rendering Features**, **Optimiz
 ### **1.1 Project Setup & Build System**
 - [x] Ensure **Conan** installs dependencies correctly  
 - [x] Create a **.gitignore** for `build/` and temporary files  
-- [ ] Implement **logging utility** for debugging (`logger.cpp`)  
+- [x] Implement **logging utility** for debugging (`logger.cpp`)  
 - [ ] Create **basic window handling** using GLFW (`window.cpp`)  
 - [ ] Implement **OpenGL context creation** (`gl_context.cpp`)  
 
