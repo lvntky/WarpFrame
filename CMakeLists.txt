@@ -17,7 +17,7 @@ find_package(spdlog REQUIRED)
 add_executable(${PROJECT_NAME}
     src/main.cc
     src/logger.cc
-    # Add your other source files here
+    src/window
 )
 
 # Link libraries
