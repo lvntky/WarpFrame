@@ -1,6 +1,6 @@
-#include "../include/warpframe/logger/logger.h"
-#include "../include/warpframe/util/constant.h"
-#include "../include/warpframe/window/window.h"
+#include <warpframe/logger/logger.h>
+#include <warpframe/util/constant.h>
+#include <warpframe/window/window.h>
 
 #include <iostream>
 

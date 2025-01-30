@@ -1,4 +1,4 @@
-#include "../include/warpframe/logger/logger.h"
+#include <warpframe/logger/logger.h>
 
 std::shared_ptr<spdlog::logger> logger;
 

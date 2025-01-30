@@ -1,5 +1,5 @@
-#include "../include/warpframe/window/window.h"
-#include "../include/warpframe/logger/logger.h"
+#include <warpframe/logger/logger.h>
+#include <warpframe/window/window.h>
 
 Window::Window(size_t width, size_t height, const char *title) {
   if (!glfwInit()) {
