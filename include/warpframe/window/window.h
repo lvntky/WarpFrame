@@ -1,8 +1,8 @@
 #ifndef WARPFRAME_WINDOW_H_
 #define WARPFRAME_WINDOW_H_
 
-#include <GLFW/glfw3.h>
 #include <glad/glad.h>
+#include <GLFW/glfw3.h>
 #include <cstddef>
 
 class Window {

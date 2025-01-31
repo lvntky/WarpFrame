@@ -50,6 +50,15 @@ DerivePointerAlignment: false  # Make sure the * or & align on the left
 EmptyLineBeforeAccessModifier: LogicalBlock
 FixNamespaceComments: true
 IncludeBlocks: Preserve
+IncludeCategories:
+  - Regex:           '^<glad/.*>'
+    Priority:        1
+  - Regex:           '^<GLFW/.*>'
+    Priority:        2
+  - Regex:           '^<.*>'
+    Priority:        3
+  - Regex:           '^".*"'
+    Priority:        4
 IndentCaseLabels: true
 IndentPPDirectives: None
 IndentWidth: 2
