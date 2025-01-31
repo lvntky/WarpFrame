@@ -1,112 +1,74 @@
-### **WarpFrame Low-Level To-Do List**  
+# WarpFrame TODO List
 
-This list is categorized into **Core Engine**, **Rendering Features**, **Optimization**, **Development Workflow**, and **Miscellaneous Improvements** to systematically build and refine WarpFrame.
+## Basic OpenGL Window
+- [x] Create a `Window` class to manage GLFW window and OpenGL context.
+- [x] Initialize GLFW and create a window.
+- [x] Set up an OpenGL context.
+- [x] Implement a basic render loop (clear screen, swap buffers, poll events).
 
----
+## Initialize GLAD/GLEW
+- [ ] Add GLAD or GLEW initialization to the `Window` class.
+- [ ] Verify OpenGL functions are loaded correctly.
 
-## **1. Core Engine Development**  
-### **1.1 Project Setup & Build System**
-- [x] Ensure **Conan** installs dependencies correctly  
-- [x] Create a **.gitignore** for `build/` and temporary files  
-- [x] Implement **logging utility** for debugging (`logger.cpp`)  
-- [ ] Create **basic window handling** using GLFW (`window.cpp`)  
-- [ ] Implement **OpenGL context creation** (`gl_context.cpp`)  
+## PS1-Like Rendering Features
+- [ ] Implement affine texture mapping:
+  - [ ] Disable perspective correction.
+  - [ ] Use `GL_NEAREST` for texture filtering.
+- [ ] Set up low-resolution rendering:
+  - [ ] Render to a framebuffer at 320x240.
+  - [ ] Upscale to window size using nearest-neighbor filtering.
+- [ ] Simulate limited color depth (16-bit RGB565) and dithering.
+- [ ] Load and render 3D models:
+  - [ ] Use a simple model format (e.g., OBJ).
+  - [ ] Render models using indexed drawing (`glDrawElements`).
 
----
+## PS1-Specific Effects
+- [ ] Add vertex wobble to mimic PS1's lack of floating-point precision.
+- [ ] Simulate texture warping (affine texture mapping artifacts).
+- [ ] Implement flat shading (`glShadeModel(GL_FLAT)`).
+- [ ] Optionally disable Z-buffer and use painter's algorithm for polygon sorting.
 
-## **2. Rendering Features**  
-### **2.1 PS1-Specific Rendering Artifacts**  
-- [ ] Implement **Affine Texture Mapping** (Disable perspective correction in fragment shader)  
-- [ ] Implement **Vertex Snapping to Fixed-Point Grid**  
-  - [ ] Define a **fixed-point precision** (e.g., 12.4 format)  
-  - [ ] Snap **vertex positions** to nearest fixed-point grid location  
-- [ ] Implement **16-bit Color Depth Simulation**  
-  - [ ] Convert floating-point colors to **RGB565 / RGB555** format  
-  - [ ] Quantize colors during rendering  
-- [ ] Implement **Low-Resolution Rendering Mode**  
-  - [ ] Render to a **lower-resolution framebuffer**  
-  - [ ] Scale up using **nearest-neighbor filtering**  
+## Optimization
+- [ ] Batch rendering to reduce draw calls.
+- [ ] Minimize OpenGL state changes.
+- [ ] Use display lists for faster rendering (optional).
 
-### **2.2 Shader System**  
-- [ ] Set up a **shader loader utility** (`shader_loader.cpp`)  
-- [ ] Implement **basic vertex and fragment shaders**  
-- [ ] Create **separate shader modules** for PS1 effects  
-  - [ ] Affine texture mapping  
-  - [ ] Dithering simulation  
-  - [ ] 16-bit color depth simulation  
-- [ ] Implement **uniform management system** for shaders  
+## Post-Processing Effects
+- [ ] Add scanlines to simulate CRT displays.
+- [ ] Implement color bleed (horizontal blur).
+- [ ] Apply dithering to simulate limited color depth.
 
-### **2.3 Texture Handling**  
-- [ ] Load **textures using stb_image** (upcoming)  
-- [ ] Implement **nearest-neighbor texture filtering**  
-- [ ] Convert **textures to fixed-point coordinates**  
-- [ ] Implement **animated texture warping** (based on vertex jitter)  
+## Testing and Refinement
+- [ ] Test with different 3D models.
+- [ ] Compare rendering with actual PS1 games.
+- [ ] Fix rendering artifacts and optimize performance.
 
-### **2.4 Fixed-Function Pipeline Emulation**  
-- [ ] Implement **fake fixed-function transformations**  
-- [ ] Create a **simplified material system**  
-- [ ] Implement **basic light-source emulation**  
-- [ ] Simulate **lack of Z-buffer precision** (optional feature)  
+## Additional Features (Optional)
+- [ ] Add simple lighting (directional or point lights).
+- [ ] Implement skeletal animations.
+- [ ] Add audio using OpenAL or SDL_mixer.
 
-### **2.5 Dithering Effects**  
-- [ ] Implement **Bayer dithering** in fragment shader  
-- [ ] Implement **blue noise dithering** as an option  
-- [ ] Add dithering to **alpha blending** for transparency effects  
-
-### **2.6 Software Rendering Mode (Upcoming Feature)**  
-- [ ] Implement a **CPU-based rasterizer**  
-- [ ] Create **basic triangle filling algorithm**  
-- [ ] Implement **fixed-point arithmetic for rasterization**  
-- [ ] Optimize **triangle scanline rendering**  
+## Polish and Release
+- [ ] Create a demo showcasing the engine.
+- [ ] Write documentation for the engine's API and features.
+- [ ] Publish the project on GitHub or another platform.
 
 ---
 
-## **3. Optimization and Performance**  
-### **3.1 OpenGL Optimization**  
-- [ ] Implement **vertex array objects (VAOs) & vertex buffer objects (VBOs)**  
-- [ ] Reduce **draw calls** by batching models  
-- [ ] Use **indexed rendering** to minimize vertex duplication  
-
-### **3.2 Memory Optimization**  
-- [ ] Implement **texture compression support**  
-- [ ] Use **optimized mesh storage formats**  
-
-### **3.3 Frame Timing & Jitter Accuracy**  
-- [ ] Simulate **PS1-style inconsistent frame pacing**  
-- [ ] Add an option for **fixed or variable timestep**  
+## Example Code Structure
+- [ ] Create `Window.h` and `Window.cc` for window management.
+- [ ] Add GLAD/GLEW initialization to the `Window` class.
+- [ ] Write a `main.cc` file to test the engine.
 
 ---
 
-## **4. Development Workflow Enhancements**  
-### **4.1 Debugging Tools**  
-- [ ] Integrate **ImGui (upcoming)** for real-time debugging  
-- [ ] Display real-time **FPS counter & render stats**  
-- [ ] Create a **simple debugging console**  
-
-### **4.2 Asset Management**  
-- [ ] Add **support for additional model formats** (e.g., `.obj`, `.dae`)  
-- [ ] Implement **basic asset loader system**  
-
-### **4.3 Build System Improvements**  
-- [ ] Configure **automated dependency installation**  
-- [ ] Set up **cross-platform testing (Windows, Linux, macOS)**  
+## Compilation
+- [ ] Set up a build script (CMake or Makefile).
+- [ ] Compile and test the engine on your platform.
 
 ---
 
-## **5. Miscellaneous Improvements**  
-### **5.1 Additional Retro Effects**  
-- [ ] Implement **CRT shader** for scanlines & phosphor glow  
-- [ ] Add **barrel distortion shader** to simulate CRT curvature  
-- [ ] Implement **glitch effects** for authenticity  
-
-### **5.2 Expanded Rendering Features**  
-- [ ] Improve **PS1-style vertex jitter emulation**  
-- [ ] Implement **hardware-accurate texture clamping**  
-- [ ] Add an **option for fog effects**  
-
-### **5.3 Community & Documentation**  
-- [ ] Improve **developer documentation**  
-- [ ] Write **code comments for clarity**  
-- [ ] Create **tutorials for adding new effects**  
-
----
+## Notes
+- Use GLAD for modern OpenGL function loading.
+- Use GLFW for window and input management.
+- Use GLM for vector and matrix math.
