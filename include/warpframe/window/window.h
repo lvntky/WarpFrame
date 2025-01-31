@@ -2,9 +2,8 @@
 #define WARPFRAME_WINDOW_H_
 
 #include <GLFW/glfw3.h>
-#include <cstddef>
-
 #include <glad/glad.h>
+#include <cstddef>
 
 class Window {
  private:
@@ -19,6 +18,7 @@ class Window {
   void pollEvents();
   void clear();
   GLFWwindow* getGLFWwindow() const;
+  void initGlad();
 };
 
 #endif  // WARPFRAME_WINDOW_H_

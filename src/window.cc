@@ -1,7 +1,7 @@
 #include <warpframe/logger/logger.h>
 #include <warpframe/window/window.h>
 
-Window::Window(size_t width, size_t height, const char *title) {
+Window::Window(size_t width, size_t height, const char* title) {
   if (!glfwInit()) {
     Logger::getLogger()->error("Unable to initialize GLFW");
     return;
@@ -15,6 +15,8 @@ Window::Window(size_t width, size_t height, const char *title) {
   }
 
   glfwMakeContextCurrent(this->window);
+  initGlad();
+
   glViewport(0, 0, width, height);
 }
 
@@ -26,7 +28,9 @@ Window::~Window() {
   glfwTerminate();
 }
 
-bool Window::shouldClose() const { return glfwWindowShouldClose(this->window); }
+bool Window::shouldClose() const {
+  return glfwWindowShouldClose(this->window);
+}
 
 void Window::swapBuffers() {
   // Logger::getLogger->info("Swapping buffers on GLFW Window.");
@@ -38,4 +42,12 @@ void Window::pollEvents() {
   glfwPollEvents();
 }
 
-void Window::clear() { glClear(GL_COLOR_BUFFER_BIT); }
+void Window::clear() {
+  glClear(GL_COLOR_BUFFER_BIT);
+}
+
+void Window::initGlad() {
+  if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+    Logger::getLogger()->error("Failed to load GLAD");
+  }
+}
