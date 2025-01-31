@@ -16,6 +16,9 @@ Window::Window(size_t width, size_t height, const char* title) {
 
   glfwMakeContextCurrent(this->window);
   initGlad();
+  if (!validateOpenGL()) {
+    return;
+  }
 
   glViewport(0, 0, width, height);
 }
@@ -50,4 +53,14 @@ void Window::initGlad() {
   if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
     Logger::getLogger()->error("Failed to load GLAD");
   }
+}
+
+bool Window::validateOpenGL() {
+  const GLubyte* version = glGetString(GL_VERSION);
+
+  if (!version) {
+    Logger::getLogger()->error("Failed to retrieve OpenGL version.");
+    return false;
+  }
+  return true;
 }

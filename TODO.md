@@ -7,8 +7,8 @@
 - [x] Implement a basic render loop (clear screen, swap buffers, poll events).
 
 ## Initialize GLAD/GLEW
-- [ ] Add GLAD or GLEW initialization to the `Window` class.
-- [ ] Verify OpenGL functions are loaded correctly.
+- [x] Add GLAD or GLEW initialization to the `Window` class.
+- [x] Verify OpenGL functions are loaded correctly.
 
 ## PS1-Like Rendering Features
 - [ ] Implement affine texture mapping:
