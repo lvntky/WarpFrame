@@ -23,6 +23,7 @@ class Window {
   void pollEvents();
   void clear();
   GLFWwindow* getGLFWwindow() const;
+  void processInput();
 };
 
 #endif  // WARPFRAME_WINDOW_WINDOW_H_

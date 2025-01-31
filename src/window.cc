@@ -9,7 +9,7 @@ Window::Window(size_t width, size_t height, const char* title) {
 
   this->window = glfwCreateWindow(width, height, title, NULL, NULL);
   if (!this->window) {
-    Logger::getLogger()->error("Failed to create GLFW window");
+    //Logger::getLogger()->error("Failed to create GLFW window");
     glfwTerminate();
     return;
   }
@@ -25,7 +25,7 @@ Window::Window(size_t width, size_t height, const char* title) {
 
 Window::~Window() {
   if (this->window) {
-    // Logger::getLogger->info("GLFW Window has been terminated.");
+    //Logger::getLogger->info("GLFW Window has been terminated.");
     glfwDestroyWindow(this->window);
   }
   glfwTerminate();
@@ -36,16 +36,17 @@ bool Window::shouldClose() const {
 }
 
 void Window::swapBuffers() {
-  // Logger::getLogger->info("Swapping buffers on GLFW Window.");
+  //Logger::getLogger->info("Swapping buffers on GLFW Window.");
   glfwSwapBuffers(this->window);
 }
 
 void Window::pollEvents() {
-  // Logger::getLogger->info("Polling events on GLFW window.");
+  //Logger::getLogger->info("Polling events on GLFW window.");
   glfwPollEvents();
 }
 
 void Window::clear() {
+  glClearColor(0.125f, 0.125f, 0.439f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT);
 }
 
@@ -63,4 +64,10 @@ bool Window::validateOpenGL() {
     return false;
   }
   return true;
+}
+
+void Window::processInput() {
+  if (glfwGetKey(this->window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+    glfwSetWindowShouldClose(this->window, true);
+  }
 }

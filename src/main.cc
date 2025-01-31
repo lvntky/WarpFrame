@@ -14,6 +14,8 @@ int main() {
   while (!window.shouldClose()) {
     window.clear();
 
+    window.processInput();
+
     window.swapBuffers();
     window.pollEvents();
   }
