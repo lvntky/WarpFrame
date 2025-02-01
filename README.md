@@ -103,6 +103,10 @@ Bug reports, feature suggestions, and documentation improvements are also apprec
 
 WarpFrame is released under the MIT License. This means you are free to use, modify, and distribute the project as long as proper attribution is given.
 
+## Acknowledgements
+- [OpenGL API Documentation](https://docs.gl/)
+- [LearnOpenGL](https://learnopengl.com/)
+
 ## Additional Resources
 
 For more information on PS1 graphics limitations and rendering techniques, refer to the following resources:
