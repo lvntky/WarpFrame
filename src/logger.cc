@@ -3,6 +3,7 @@
 #include <warpframe/logger/logger.h>
 
 std::shared_ptr<spdlog::logger> Logger::logger;
+static bool isInit = false;
 
 void Logger::init() {
   try {
@@ -23,9 +24,12 @@ void Logger::init() {
     spdlog::set_default_logger(logger);
 
     logger->info("Logger initialized with console and file output.");
-  } catch (const spdlog::spdlog_ex &ex) {
+    isInit = true;
+  } catch (const spdlog::spdlog_ex& ex) {
     std::cerr << "Logger initialization failed: " << ex.what() << std::endl;
   }
 }
 
-std::shared_ptr<spdlog::logger> Logger::getLogger() { return logger; }
+std::shared_ptr<spdlog::logger> Logger::getLogger() {
+  return logger;
+}
