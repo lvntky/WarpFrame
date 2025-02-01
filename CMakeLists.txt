@@ -19,6 +19,7 @@ add_executable(${PROJECT_NAME}
     src/logger.cc
     src/window.cc
     src/keyboard.cc
+    src/shader.cc
 )
 
 # Link libraries
