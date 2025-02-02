@@ -5,8 +5,13 @@
 
 #include <iostream>
 
-static const float vertices[] = {-0.5f, -0.5f, 0.0f, 0.5f, -0.5f,
-                                 0.0f,  0.0f,  0.5f, 0.0f};
+static const float vertices[] = {
+    // Positions       // Colors
+    -0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,  // Bottom left - Red
+     0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,  // Bottom right - Green
+     0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f   // Top - Blue
+};
+
 
 static const char* vertexPath = "./assets/shaders/vertex.glsl";
 static const char* fragmentPath = "./assets/shaders/fragment.glsl";
