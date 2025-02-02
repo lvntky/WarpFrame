@@ -9,6 +9,7 @@ std::string Shader::readFile(const char* filePath) {
     throw std::runtime_error("File not foud.");
   }
   buffer << file.rdbuf();
+  Logger::getLogger()->debug("shader source code: {}", buffer.str());
   return buffer.str();
 }
 
@@ -21,12 +22,12 @@ void Shader::checkCompileErrors(GLuint shaderID, std::string type) {
       glGetProgramInfoLog(shaderID, 1024, nullptr, infoLog);
       Logger::getLogger()->error("Shader program linking error: {}", infoLog);
     }
-
   } else {
-    glGetProgramiv(shaderID, GL_COMPILE_STATUS, &success);
+    glGetShaderiv(shaderID, GL_COMPILE_STATUS, &success);
     if (!success) {
-      glGetProgramInfoLog(shaderID, 1024, nullptr, infoLog);
-      Logger::getLogger()->error("Shader compilation error: {}", infoLog);
+      glGetShaderInfoLog(shaderID, 1024, nullptr, infoLog);
+      Logger::getLogger()->error("Shader compilation error: {} - shader id: {}",
+                                 infoLog, shaderID);
     }
   }
 }
