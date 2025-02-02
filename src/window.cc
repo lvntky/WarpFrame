@@ -20,7 +20,12 @@ Window::Window(size_t width, size_t height, const char* title) {
     return;
   }
 
-  glViewport(0, 0, width, height);
+  Logger::getLogger()->info(
+      "OpenGL version supported: {}",
+      reinterpret_cast<const char*>(glGetString(GL_VERSION)));
+
+  Logger::getLogger()->info(
+      "Renderer: {}", reinterpret_cast<const char*>(glGetString(GL_RENDERER)));
 }
 
 Window::~Window() {
