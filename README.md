@@ -139,9 +139,3 @@ If you want to hack on rasterizers, bring your profiler.
 
 MIT. Free to use, fork, and experiment.
 
----
-
-## Star This Project
-
-If you find warpframe interesting, educational, or just enjoy seeing triangles burn your CPU cycles, please star the repo. Stars tell me to keep going, and help others discover it.
-
