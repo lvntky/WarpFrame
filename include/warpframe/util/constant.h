@@ -1,8 +1,0 @@
-#ifndef WARPFRAME_CONSTANT_H_
-#define WARPFRAME_CONSTANT_H_
-
-#define DEF_WINDOW_WIDTH 640
-#define DEF_WINDOW_HEIGHT 480
-#define TITLE "WarpFrame"
-
-#endif // WARPFRAME_CONSTANT_H_
