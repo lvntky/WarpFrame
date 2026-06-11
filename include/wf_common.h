@@ -11,6 +11,8 @@
 #define WF_WINDOW_WIDTH (WF_INTERNAL_WIDTH * WF_WINDOW_SCALE)
 #define WF_WINDOW_HEIGHT (WF_INTERNAL_HEIGHT * WF_WINDOW_SCALE)
 
+#define WF_ARRAY_LENGTH(arr) (sizeof(arr) / sizeof((arr)[0]))
+
 typedef struct wf_input {
   bool quit;
 

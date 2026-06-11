@@ -12,7 +12,7 @@ irnd->color_buffer = calloc(WF_INTERNAL_WIDTH * WF_INTERNAL_HEIGHT,
 				    sizeof(uint32_t));
 irnd->depth_buffer = calloc(WF_INTERNAL_WIDTH * WF_INTERNAL_HEIGHT,
 				    sizeof(uint32_t));
-
+irnd->data_len = WF_INTERNAL_WIDTH * WF_INTERNAL_HEIGHT;
 	
 	*renderer = irnd;
 	return 0;

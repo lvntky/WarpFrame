@@ -7,7 +7,7 @@ typedef struct c_renderer {
 	uint32_t *framebuffer;
 	uint32_t *color_buffer;
 	uint32_t *depth_buffer;
-
+	uint32_t data_len;
 } c_renderer_t;
 
 int c_renderer_init(c_renderer_t **renderer);
