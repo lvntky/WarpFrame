@@ -2,6 +2,7 @@
 #include <platform_sdl.h>
 #include <wf_common.h>
 #include <math.h>
+#include <c_renderer.h>
 
 int main(int argc, char *argv[])
 {
@@ -16,17 +17,23 @@ int main(int argc, char *argv[])
 	wf_input_t input = { 0 };
 	float time = 0.0f;
 
+	c_renderer_t *renderer;
+	c_renderer_init(&renderer);
+
+	// test gradient on renderer
+	for (int i = 0; i < WF_INTERNAL_WIDTH * WF_INTERNAL_HEIGHT; i++) {
+		renderer->color_buffer[i] = 0xFF0000;
+		//		renderer->color_buffer[i] = 0x000000;
+	}
+
 	while (!input.quit) {
-		wf_platform_poll_input(platform, &input);
+		wf_platform_poll_input(&input);
 		float dt = wf_platform_get_delta_time(platform);
 		time += dt;
+		//fprintf(stdout, "Delta Time: %f\n", time);
 
-		uint8_t r = (uint8_t)(40.0f + 30.0f * sinf(time * 2.0f));
-		uint8_t g = 20;
-		uint8_t b = 40;
-
-		wf_platform_clear(platform, r, g, b);
-		wf_platform_present(platform);
+		//		wf_platform_clear(platform, r, g, b);
+		wf_platform_present(platform, renderer->color_buffer);
 	}
 
 	wf_platform_shutdown(platform);

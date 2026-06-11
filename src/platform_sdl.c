@@ -7,6 +7,7 @@
 struct wf_platform_t {
 	SDL_Window *window;
 	SDL_Renderer *renderer;
+	SDL_Texture *framebuffer_texture;
 
 	int internal_width;
 	int internal_height;
@@ -62,6 +63,13 @@ bool wf_platform_init(wf_platform_t **out_platform, int interal_width,
 		return false;
 	}
 
+	platform->framebuffer_texture = SDL_CreateTexture(
+		platform->renderer, SDL_PIXELFORMAT_ARGB8888,
+		SDL_TEXTUREACCESS_STREAMING, platform->internal_width,
+		platform->internal_height);
+
+	//TODO: check texture
+
 	SDL_RenderSetLogicalSize(platform->renderer, platform->internal_width,
 				 platform->internal_height);
 
@@ -99,7 +107,7 @@ void wf_platform_clear(wf_platform_t *platform, uint8_t r, uint8_t g, uint8_t b)
 	SDL_RenderClear(platform->renderer);
 }
 
-void wf_platform_poll_input(wf_platform_t *platform, wf_input_t *input)
+void wf_platform_poll_input(wf_input_t *input)
 {
 	input->key_up = false;
 	input->key_down = false;
@@ -135,16 +143,29 @@ void wf_platform_poll_input(wf_platform_t *platform, wf_input_t *input)
 	}
 }
 
-void wf_platform_present(wf_platform_t* platform) {
+void wf_platform_present(wf_platform_t *platform, uint32_t *frame_data)
+{
+	wf_platform_present_framebuffer(platform, frame_data);
 	SDL_RenderPresent(platform->renderer);
 }
 
-float wf_platform_get_delta_time(wf_platform_t* platform) {
+float wf_platform_get_delta_time(wf_platform_t *platform)
+{
 	uint64_t now = SDL_GetPerformanceCounter();
 	uint64_t freq = SDL_GetPerformanceFrequency();
 
-	platform->delta_time = (float)(now - platform->last_counter) / (float)freq;
+	platform->delta_time =
+		(float)(now - platform->last_counter) / (float)freq;
 	platform->last_counter = now;
 
 	return platform->delta_time;
+}
+
+void wf_platform_present_framebuffer(wf_platform_t *platform,
+                                     const uint32_t *framebuffer)
+{
+    SDL_UpdateTexture(platform->framebuffer_texture, NULL, framebuffer,
+                      platform->internal_width * sizeof(uint32_t));
+    SDL_RenderCopy(platform->renderer, platform->framebuffer_texture,
+                   NULL, NULL);
 }

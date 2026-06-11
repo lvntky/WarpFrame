@@ -5,15 +5,18 @@
 
 typedef struct wf_platform_t wf_platform_t;
 
-bool wf_platform_init(wf_platform_t** out_platform, int interal_width,
-                      int internal_height, int scale);
+bool wf_platform_init(wf_platform_t **out_platform, int interal_width,
+		      int internal_height, int scale);
 
-void wf_platform_shutdown(wf_platform_t* platform);
-void wf_platform_poll_input(wf_platform_t* platform, wf_input_t* input);
-void wf_platform_clear(wf_platform_t* platform, uint8_t r, uint8_t g,
-                       uint8_t b);
-void wf_platform_present(wf_platform_t* platform);
+void wf_platform_shutdown(wf_platform_t *platform);
+void wf_platform_poll_input(wf_input_t *input);
+void wf_platform_clear(wf_platform_t *platform, uint8_t r, uint8_t g,
+		       uint8_t b);
+void wf_platform_present(wf_platform_t *platform, uint32_t *frame_data);
 
-float wf_platform_get_delta_time(wf_platform_t* platform);
+float wf_platform_get_delta_time(wf_platform_t *platform);
 
-#endif  //PLATFORM_SDL_H_
+void wf_platform_present_framebuffer(wf_platform_t *platform,
+				     const uint32_t *framebuffer);
+
+#endif //PLATFORM_SDL_H_
