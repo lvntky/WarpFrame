@@ -28,11 +28,18 @@ int main(int argc, char *argv[])
 		//		renderer->color_buffer[i] = 0x000000;
 	}
 
-	c_rasterizer_put_pixel(renderer, 160, 120, 0x00FF00);
+	vec2i_t d = { 160, 20 };
+	vec2i_t e = { 45, 80 };
+	vec2i_t f = { 160, 80 };
 
-	vec2i_t a = { 0, 0 };
-	vec2i_t b = { 0, 240};
-	vec2i_t c = { 160, 120 };
+	vec2i_t a = { 150, 20 };
+	vec2i_t b = { 30, 60 };
+	vec2i_t c = { 160, 80 };
+
+	c_rasterizer_draw_triangle_solid(renderer, d, e, f, 0x0000FF);
+	c_rasterizer_draw_triangle_solid(renderer, a, b, c, 0xFF00FF);
+	c_rasterizer_draw_triangle_bounding_box_points(renderer, d, e, f);
+	c_rasterizer_draw_triangle_bounding_box_points(renderer, a, b, c);
 
 	int counter = 0;
 
@@ -44,8 +51,6 @@ int main(int argc, char *argv[])
 
 		//		wf_platform_clear(platform, r, g, b);
 
-		c_rasterizer_draw_triangle_solid(renderer, a, b, c,
-										 0xFF00FF / dt);
 		wf_platform_present(platform, renderer->color_buffer);
 		counter += 1;
 	}
@@ -54,7 +59,3 @@ int main(int argc, char *argv[])
 
 	return 0;
 }
-
-
-
-
