@@ -5,6 +5,7 @@
 #include <c_renderer.h>
 #include <c_rasterizer.h>
 #include <m_type.h>
+#include <string.h>
 
 int main(int argc, char *argv[])
 {
@@ -24,20 +25,20 @@ int main(int argc, char *argv[])
 
 	// test gradient on renderer
 	for (int i = 0; i < WF_INTERNAL_WIDTH * WF_INTERNAL_HEIGHT; i++) {
-		renderer->color_buffer[i] = 0xFF0000;
+		renderer->color_buffer[i] = 0x000000;
 		//		renderer->color_buffer[i] = 0x000000;
 	}
 
-	vec2i_t d = { 160, 20 };
-	vec2i_t e = { 45, 80 };
-	vec2i_t f = { 160, 80 };
+	c_rasterizer_vertex_t d = { 160, 20, 0};
+	c_rasterizer_vertex_t e = { 45, 80, 0};
+	c_rasterizer_vertex_t f = { 160, 80, 0};
 
-	vec2i_t a = { 150, 20 };
-	vec2i_t b = { 30, 60 };
-	vec2i_t c = { 160, 80 };
+	c_rasterizer_vertex_t a = { 150, 20, 0};
+	c_rasterizer_vertex_t b = { 30, 60, 0};
+	c_rasterizer_vertex_t c = { 160, 80, 0};
 
-	trianglei_t triangle1 = { d, e, f, 0 };
-	trianglei_t triangle2 = { a, b, c, 0 };
+	c_rasterizer_triangle_t triangle1 = { d, e, f, 0 };
+	c_rasterizer_triangle_t triangle2 = { a, b, c, 0 };
 
 	c_rasterizer_draw_triangle_solid(renderer, triangle1, 0x0000FF);
 	c_rasterizer_draw_triangle_solid(renderer, triangle2, 0xFF00FF);
