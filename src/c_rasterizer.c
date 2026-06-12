@@ -33,8 +33,13 @@ static int edge_function(vec2i_t a, vec2i_t b, vec2i_t p)
 	return m_det2i(ab, ap);
 }
 
-static bool is_point_inside_triange(vec2i_t a, vec2i_t b, vec2i_t c, vec2i_t p)
+static bool is_point_inside_triange(trianglei_t triangle, vec2i_t p)
 {
+	//TODO: triangle to vector2i convertion function
+	vec2i_t a = triangle.pa;
+	vec2i_t b = triangle.pb;
+	vec2i_t c = triangle.pc;
+
 	int w0 = edge_function(a, b, p);
 	int w1 = edge_function(b, c, p);
 	int w2 = edge_function(c, a, p);
@@ -55,9 +60,12 @@ void c_rasterizer_put_pixel(c_renderer_t *renderer, int x, int y,
 	renderer->color_buffer[y * WF_INTERNAL_WIDTH + x] = color;
 }
 
-bounding_box_t c_rasterizer_triange_calculate_bounding_box(vec2i_t a, vec2i_t b,
-							   vec2i_t c)
+bounding_box_t c_rasterizer_triange_calculate_bounding_box(trianglei_t triangle)
 {
+	vec2i_t a = triangle.pa;
+	vec2i_t b = triangle.pb;
+	vec2i_t c = triangle.pc;
+
 	int x_max = max(a.x, b.x, c.x);
 	int x_min = min(a.x, b.x, c.x);
 	int y_max = max(a.y, b.y, c.y);
@@ -70,11 +78,11 @@ bounding_box_t c_rasterizer_triange_calculate_bounding_box(vec2i_t a, vec2i_t b,
 	return box;
 }
 
-void c_rasterizer_draw_triangle_solid(c_renderer_t *renderer, vec2i_t a,
-				      vec2i_t b, vec2i_t c, uint32_t color)
+void c_rasterizer_draw_triangle_solid(c_renderer_t *renderer,
+				      trianglei_t triangle, uint32_t color)
 {
 	bounding_box_t box =
-		c_rasterizer_triange_calculate_bounding_box(a, b, c);
+		c_rasterizer_triange_calculate_bounding_box(triangle);
 
 	int x_start = box.top_left.x;
 	int x_end = box.top_right.x;
@@ -98,7 +106,7 @@ void c_rasterizer_draw_triangle_solid(c_renderer_t *renderer, vec2i_t a,
 		uint32_t *row = &renderer->color_buffer[y * WF_INTERNAL_WIDTH];
 		for (int x = x_start; x <= x_end; x++) {
 			vec2i_t p = { x, y };
-			if (is_point_inside_triange(a, b, c, p)) {
+			if (is_point_inside_triange(triangle, p)) {
 				row[x] = color;
 			}
 		}
@@ -106,11 +114,11 @@ void c_rasterizer_draw_triangle_solid(c_renderer_t *renderer, vec2i_t a,
 }
 
 void c_rasterizer_draw_triangle_bounding_box_points(c_renderer_t *renderer,
-						    vec2i_t a, vec2i_t b,
-						    vec2i_t c)
+						    trianglei_t triangle)
 {
 	bounding_box_t box =
-		c_rasterizer_triange_calculate_bounding_box(a, b, c);
+		c_rasterizer_triange_calculate_bounding_box(triangle);
+
 	c_rasterizer_put_pixel(renderer, box.top_left.x, box.top_left.y,
 			       0x00FF00);
 	c_rasterizer_put_pixel(renderer, box.top_right.x, box.top_right.y,

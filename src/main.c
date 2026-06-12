@@ -36,10 +36,13 @@ int main(int argc, char *argv[])
 	vec2i_t b = { 30, 60 };
 	vec2i_t c = { 160, 80 };
 
-	c_rasterizer_draw_triangle_solid(renderer, d, e, f, 0x0000FF);
-	c_rasterizer_draw_triangle_solid(renderer, a, b, c, 0xFF00FF);
-	c_rasterizer_draw_triangle_bounding_box_points(renderer, d, e, f);
-	c_rasterizer_draw_triangle_bounding_box_points(renderer, a, b, c);
+	trianglei_t triangle1 = { d, e, f, 0 };
+	trianglei_t triangle2 = { a, b, c, 0 };
+
+	c_rasterizer_draw_triangle_solid(renderer, triangle1, 0x0000FF);
+	c_rasterizer_draw_triangle_solid(renderer, triangle2, 0xFF00FF);
+	c_rasterizer_draw_triangle_bounding_box_points(renderer, triangle1);
+	c_rasterizer_draw_triangle_bounding_box_points(renderer, triangle2);
 
 	int counter = 0;
 
