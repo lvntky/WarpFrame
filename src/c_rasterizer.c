@@ -6,6 +6,7 @@
 #include <wf_common.h>
 #include <m_type.h>
 #include <m_util.h>
+#include <limits.h>
 
 typedef struct bounding_box_t {
 	vec2i_t top_left;
@@ -50,7 +51,9 @@ static bool is_point_inside_triange(c_rasterizer_triangle_t triangle,
 
 	return all_neg || all_pos;
 }
-
+static uint32_t calculate_pixel_depth() {
+	return INT_MIN;
+}
 
 void c_rasterizer_put_pixel(c_renderer_t *renderer, int x, int y,
 			    uint32_t color)
@@ -110,10 +113,18 @@ void c_rasterizer_draw_triangle_solid(c_renderer_t *renderer,
 
 	for (int y = y_start; y <= y_end; y++) {
 		uint32_t *row = &renderer->color_buffer[y * WF_INTERNAL_WIDTH];
+		uint32_t *renderer_depth = &renderer->depth_buffer[y * WF_INTERNAL_WIDTH];
+		
 		for (int x = x_start; x <= x_end; x++) {
-			c_rasterizer_vertex_t p = { x, y, 0 };
+			c_rasterizer_vertex_t p = { x, y, INT_MAX };
 			if (is_point_inside_triange(triangle, p)) {
-				row[x] = color;
+				p.z = calculate_pixel_depth();
+
+				if (p.z < renderer_depth[x]) {
+					renderer_depth[x] = p.z;
+					row[x] = color;
+				}
+
 			}
 		}
 	}
@@ -133,8 +144,4 @@ void c_rasterizer_draw_triangle_bounding_box_points(
 			       0x00FF00);
 	c_rasterizer_put_pixel(renderer, box.bottom_right.x, box.bottom_right.y,
 			       0x00FF00);
-}
-
-int c_rasterizer_triangle_calculate_depth(c_rasterizer_triangle_t triangle)
-{
 }

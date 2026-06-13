@@ -15,7 +15,6 @@ void c_rasterizer_draw_triangle_solid(c_renderer_t *renderer,
 bounding_box_t
 c_rasterizer_triange_calculate_bounding_box(c_rasterizer_triangle_t triangle);
 
-int c_rasterizer_triangle_calculate_depth(c_rasterizer_triangle_t triangle);
 void c_rasterizer_draw_triangle_bounding_box_points(c_renderer_t *renderer,
 						    c_rasterizer_triangle_t triangle);
 

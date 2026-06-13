@@ -9,6 +9,10 @@
 
 int main(int argc, char *argv[])
 {
+	if (argc < 2) {
+		fprintf(stdout, "%s running without loaded object", argv[0]);
+	}
+
 	wf_platform_t *platform = NULL;
 
 	if (!wf_platform_init(&platform, WF_INTERNAL_WIDTH, WF_INTERNAL_HEIGHT,
@@ -22,12 +26,6 @@ int main(int argc, char *argv[])
 
 	c_renderer_t *renderer;
 	c_renderer_init(&renderer);
-
-	// test gradient on renderer
-	for (int i = 0; i < WF_INTERNAL_WIDTH * WF_INTERNAL_HEIGHT; i++) {
-		renderer->color_buffer[i] = 0x000000;
-		//		renderer->color_buffer[i] = 0x000000;
-	}
 
 	c_rasterizer_vertex_t d = { 160, 20, 0};
 	c_rasterizer_vertex_t e = { 45, 80, 0};
