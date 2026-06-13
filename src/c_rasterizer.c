@@ -37,7 +37,6 @@ static int edge_function(c_rasterizer_vertex_t a, c_rasterizer_vertex_t b,
 static bool is_point_inside_triange(c_rasterizer_triangle_t triangle,
 				    c_rasterizer_vertex_t p)
 {
-	//TODO: triangle to vector2i convertion function
 	c_rasterizer_vertex_t a = triangle.a;
 	c_rasterizer_vertex_t b = triangle.b;
 	c_rasterizer_vertex_t c = triangle.c;
@@ -51,6 +50,7 @@ static bool is_point_inside_triange(c_rasterizer_triangle_t triangle,
 
 	return all_neg || all_pos;
 }
+
 
 void c_rasterizer_put_pixel(c_renderer_t *renderer, int x, int y,
 			    uint32_t color)
