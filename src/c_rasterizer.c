@@ -15,6 +15,12 @@ typedef struct bounding_box_t {
 	vec2i_t bottom_right;
 } bounding_box_t;
 
+typedef struct barycentric {
+	float l0;
+	float l1;
+	float l2;
+} barycentric_t;
+
 static int min(int a, int b, int c)
 {
 	int pre = a < b ? a : b;
@@ -27,12 +33,38 @@ static int max(int a, int b, int c)
 	return pre > c ? pre : c;
 }
 
+//E_ab(P) = (Vb.x - Va.x) * (P.y - Va.y) - (Vb.y - Va.y) * (P.x - Va.x)
 static int edge_function(c_rasterizer_vertex_t a, c_rasterizer_vertex_t b,
 			 c_rasterizer_vertex_t p)
 {
-	vec2i_t ab = { (b.x - a.x), (b.y - a.y) };
-	vec2i_t ap = { (p.x - a.x), (p.y - a.y) };
-	return m_det2i(ab, ap);
+	return (b.x - a.x) * (p.y - a.y) - (b.y - a.y) * (p.x - a.x);
+}
+
+static barycentric_t barycentric_coordinate(c_rasterizer_triangle_t triangle,
+					    c_rasterizer_vertex_t p)
+{
+	c_rasterizer_vertex_t a = triangle.a;
+	c_rasterizer_vertex_t b = triangle.b;
+	c_rasterizer_vertex_t c = triangle.c;
+
+	int area = edge_function(a, b, c);
+
+	if (area == 0) {
+		return (barycentric_t){ 0.0f, 0.0f, 0.0f }; // degenerate
+	}
+	int wa = edge_function(b, c, p); // opposite a
+	int wb = edge_function(c, a, p); // opposite b
+	int wc = edge_function(a, b, p); // opposite c
+
+	float inv_area = 1.0f / (float)area;
+	return (barycentric_t){ wa * inv_area, wb * inv_area, wc * inv_area };
+}
+
+static float calculate_pixel_depth(c_rasterizer_triangle_t triangle,
+				   barycentric_t bc)
+{
+	return bc.l0 * (float)triangle.a.z + bc.l1 * (float)triangle.b.z +
+	       bc.l2 * (float)triangle.c.z;
 }
 
 static bool is_point_inside_triange(c_rasterizer_triangle_t triangle,
@@ -50,9 +82,6 @@ static bool is_point_inside_triange(c_rasterizer_triangle_t triangle,
 	bool all_pos = (w0 >= 0 && w1 >= 0 && w2 >= 0);
 
 	return all_neg || all_pos;
-}
-static uint32_t calculate_pixel_depth() {
-	return INT_MIN;
 }
 
 void c_rasterizer_put_pixel(c_renderer_t *renderer, int x, int y,
@@ -113,18 +142,20 @@ void c_rasterizer_draw_triangle_solid(c_renderer_t *renderer,
 
 	for (int y = y_start; y <= y_end; y++) {
 		uint32_t *row = &renderer->color_buffer[y * WF_INTERNAL_WIDTH];
-		uint32_t *renderer_depth = &renderer->depth_buffer[y * WF_INTERNAL_WIDTH];
-		
+		uint32_t *renderer_depth =
+			&renderer->depth_buffer[y * WF_INTERNAL_WIDTH];
+
 		for (int x = x_start; x <= x_end; x++) {
 			c_rasterizer_vertex_t p = { x, y, INT_MAX };
 			if (is_point_inside_triange(triangle, p)) {
-				p.z = calculate_pixel_depth();
+				barycentric_t pbar =
+					barycentric_coordinate(triangle, p);
+				p.z = calculate_pixel_depth(triangle, pbar);
 
 				if (p.z < renderer_depth[x]) {
 					renderer_depth[x] = p.z;
 					row[x] = color;
 				}
-
 			}
 		}
 	}
