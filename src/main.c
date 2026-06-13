@@ -27,19 +27,22 @@ int main(int argc, char *argv[])
 	c_renderer_t *renderer;
 	c_renderer_init(&renderer);
 
-	c_rasterizer_vertex_t a = { 160, 20, 10 };
-	c_rasterizer_vertex_t b = { 45, 80, 10 };
-	c_rasterizer_vertex_t c = { 160, 80, 10 };
-
+	c_rasterizer_vertex_t a = { 160, 20, 50 };
+	c_rasterizer_vertex_t b = { 45, 80, 1 };
+	c_rasterizer_vertex_t c = { 160, 80, 200 };
+	c_rasterizer_vertex_t x = { 45, 20, 1500 };
+	
 	c_rasterizer_vertex_t d = { 150, 20, 5 };
 	c_rasterizer_vertex_t e = { 30, 60, 5 };
-	c_rasterizer_vertex_t f = { 160, 80, 5 };
+	c_rasterizer_vertex_t f = { 160, 100, 5 };
 
 	c_rasterizer_triangle_t triangle1 = { a, b, c, 0 };
-	c_rasterizer_triangle_t triangle2 = { d, e, f, 0 };
-
-	c_rasterizer_draw_triangle_solid(renderer, triangle2, 0x0000FF);
+//	c_rasterizer_triangle_t triangle2 = { d, e, f, 0 };
+	c_rasterizer_triangle_t triangle3 = { a, b, x, 0 };
+	
+//	c_rasterizer_draw_triangle_solid(renderer, triangle2, 0x0000FF);
 	c_rasterizer_draw_triangle_solid(renderer, triangle1, 0xFF0000);
+	c_rasterizer_draw_triangle_solid(renderer, triangle3, 0xFF0000);
 
 
 	int counter = 0;

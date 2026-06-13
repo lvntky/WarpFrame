@@ -84,6 +84,20 @@ static bool is_point_inside_triange(c_rasterizer_triangle_t triangle,
 	return all_neg || all_pos;
 }
 
+// todo: temporart will delete
+static uint32_t depth_to_gray(float z, float z_near, float z_far)
+{
+	float t = (z - z_near) / (z_far - z_near);
+	if (t < 0.0f)
+		t = 0.0f;
+	if (t > 1.0f)
+		t = 1.0f;
+
+	uint8_t g = (uint8_t)(t * 255.0f + 1.5f);
+	return (g << 16) | (g << 8) | g; // 0x00RRGGBB
+}
+// temprary ends here
+
 void c_rasterizer_put_pixel(c_renderer_t *renderer, int x, int y,
 			    uint32_t color)
 {
@@ -154,7 +168,11 @@ void c_rasterizer_draw_triangle_solid(c_renderer_t *renderer,
 
 				if (p.z < renderer_depth[x]) {
 					renderer_depth[x] = p.z;
-					row[x] = color;
+
+
+					uint32_t new_color = depth_to_gray(p.z, 0.0f, 200.0f);
+					row[x] = new_color;
+					//row[x] = color;
 				}
 			}
 		}
