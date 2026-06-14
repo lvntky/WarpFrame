@@ -6,7 +6,7 @@
 typedef struct c_rasterizer_vertex {
 	int x;
 	int y;
-	uint32_t z;
+	float z;
 } c_rasterizer_vertex_t;
 
 typedef struct c_rasterizer_triangle {
