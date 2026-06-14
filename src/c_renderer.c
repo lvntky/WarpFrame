@@ -38,3 +38,12 @@ void c_renderer_shutdown(c_renderer_t *renderer)
 		free(renderer);
 	}
 }
+void c_renderer_clean(c_renderer_t *renderer)
+{
+	memset(renderer->depth_buffer, INT_MAX,
+	       renderer->data_len * (sizeof(uint32_t)));
+
+	
+	memset(renderer->color_buffer, 0x000000,
+	       renderer->data_len * (sizeof(uint32_t)));
+}

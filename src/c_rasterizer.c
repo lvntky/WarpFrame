@@ -96,6 +96,22 @@ static uint32_t depth_to_gray(float z, float z_near, float z_far)
 	uint8_t g = (uint8_t)(t * 255.0f + 1.5f);
 	return (g << 16) | (g << 8) | g; // 0x00RRGGBB
 }
+
+static uint32_t depth_to_rgb_color(float z, float z_near, float z_far)
+{
+	float t = (z - z_near) / (z_far - z_near);
+
+	if (t < 0.0f)
+		t = 0.0f;
+	if (t > 1.0f)
+		t = 1.0f;
+
+	uint8_t r = (uint8_t)((1.0f - t) * 255.0f);
+	uint8_t g = 0;
+	uint8_t b = (uint8_t)(t * 255.0f);
+
+	return ((uint32_t)r << 16) | ((uint32_t)g << 8) | ((uint32_t)b);
+}
 // temprary ends here
 
 void c_rasterizer_put_pixel(c_renderer_t *renderer, int x, int y,
@@ -168,10 +184,7 @@ void c_rasterizer_draw_triangle_solid(c_renderer_t *renderer,
 
 				if (p.z < renderer_depth[x]) {
 					renderer_depth[x] = p.z;
-
-
-					uint32_t new_color = depth_to_gray(p.z, 0.0f, 200.0f);
-					row[x] = new_color;
+					row[x] = depth_to_gray(p.z, 30, 170);
 					//row[x] = color;
 				}
 			}

@@ -12,5 +12,5 @@ typedef struct c_renderer {
 
 int c_renderer_init(c_renderer_t **renderer);
 void c_renderer_shutdown(c_renderer_t *renderer);
-
+void c_renderer_clean(c_renderer_t *renderer);
 #endif //C_RENDERER_H_
