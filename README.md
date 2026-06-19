@@ -1,141 +1,314 @@
+# WarpFrame
 
-# warpframe
+**WarpFrame** is a PS1-inspired software renderer written in C.
 
-**warpframe** is a modern C++23 experiment in building a **retro software GPU** that mimics the PlayStation 1’s quirks while pushing modern CPUs with threads, SIMD, and cache-aware design.
+It renders 3D geometry on the CPU without relying on modern GPU graphics APIs such as OpenGL, Vulkan, or DirectX. The project focuses on understanding the classic 3D rendering pipeline by implementing the core stages manually: transformation, projection, rasterization, depth testing, and framebuffer presentation.
 
-It is not an emulator. It is not OpenGL. It is a handcrafted pipeline: vertices → clipper → tile bins → raster → framebuffer. Every pixel is touched by your CPU.
+WarpFrame is designed as a low-level graphics programming project with a retro visual direction inspired by early 3D console games.
 
----
+## Overview
 
-## Why warpframe?
+Modern graphics programming often hides most of the rendering pipeline behind GPU APIs and shader systems. WarpFrame takes the opposite approach.
 
-Because GPUs are black boxes. If you’ve ever asked yourself:
+The renderer exposes the fundamental steps of 3D rendering directly in C:
 
-- *How does a vertex become a pixel?*  
-- *Why did the PS1’s textures wobble and warp?*  
-- *What happens when you rasterize with only integers and affine math?*  
-
-…then warpframe is your microscope. It’s a fast, hackable, low-level playground.
-
----
-
-## Features (work in progress)
-
-- **Pure CPU rasterizer** (no OpenGL, no Vulkan).  
-- **PS1-style quirks**:  
-  - Affine texture mapping (toggle vs perspective-correct).  
-  - 15-bit RGB output with ordered dithering.  
-  - Integer vertex snap for that unmistakable jitter.  
-- **Modern tricks**:  
-  - Multithreaded tiling renderer.  
-  - SIMD hot loops (SSE2 baseline, AVX2 path).  
-  - Frame-arena allocator, job system, cache-friendly layouts.  
-- **ImGui HUD** for live toggles, metrics, frame timings.  
-- **Tiny dependency footprint**: SDL2, ImGui, fmt, stb, tinyobjloader.  
-
----
-
-## Pipeline Diagram
-
-```
-   [OBJ/GLTF] → [Vertex Shader (CPU)] → [Clipping] → [Tile Binning]
-           → [Rasterizer: spans, barycentrics, z-buffer]
-           → [Texture sampling / shading]
-           → [Dither / quantize 15-bit]
-           → [Framebuffer (RGBA8)]
-           → [SDL2 Present]
+```text
+3D Model Data
+    -
+Vertex Transformation
+    -
+Projection
+    -
+Viewport Mapping
+    -
+Triangle Rasterization
+    -
+Depth Testing
+    -
+Framebuffer Output
+    -
+SDL2 Presentation
 ```
 
----
+The goal is not only to display 3D objects, but to understand how 3D data becomes pixels on the screen.
 
-## Screenshots
+## Visual Direction
 
-*(insert GIF/WebM of spinning textured cube with affine wobble vs perspective-correct toggle here)*
+WarpFrame is inspired by the visual characteristics of PlayStation 1 era 3D games.
 
----
+This includes:
 
-## Getting Started
+* low resolution rendering
+* low-poly geometry
+* visible triangle structure
+* limited precision transformations
+* affine texture distortion
+* unstable vertex movement
+* simple lighting
+* retro color and depth artifacts
 
-Clone and build:
+These effects are not treated as bugs. They are part of the intended aesthetic.
+
+## Core Concepts
+
+### Software Rendering
+
+WarpFrame performs rendering on the CPU.
+
+Instead of sending triangles to the GPU, the renderer manually processes vertices, fills triangles, calculates depth values, and writes pixels into a color buffer.
+
+This makes the renderer slower than hardware rendering, but much more transparent and educational.
+
+### Framebuffer
+
+The renderer owns an internal framebuffer.
+
+A framebuffer is simply a block of memory where each element represents a pixel on the screen.
+
+After WarpFrame draws into this memory, the platform layer presents it through SDL2.
+
+### Triangle Rasterization
+
+Triangles are the basic primitive of the renderer.
+
+A 3D model is eventually converted into triangles. Each triangle is transformed, projected, mapped to screen coordinates, and then rasterized into pixels.
+
+WarpFrame uses edge functions and barycentric coordinates to determine whether a pixel is inside a triangle.
+
+### Depth Buffer
+
+A depth buffer stores the depth value of each pixel.
+
+When multiple triangles overlap on the screen, the depth buffer decides which pixel is closer to the camera.
+
+Without a depth buffer, farther triangles could incorrectly appear in front of nearer triangles.
+
+### Projection
+
+Projection converts 3D positions into 2D screen-space positions.
+
+WarpFrame uses perspective projection to make distant objects appear smaller and nearby objects appear larger.
+
+This is one of the key steps that turns raw 3D coordinates into a believable 3D image.
+
+### Viewport Transformation
+
+After projection, normalized coordinates are converted into screen coordinates.
+
+This process maps abstract 3D output into actual pixel positions inside the internal framebuffer.
+
+## Architecture
+
+WarpFrame is organized around a small number of clear layers.
+
+```text
+Application
+    |
+    v
+Renderer
+    |
+    v
+Rasterizer
+    |
+    v
+Math / Utility
+    |
+    v
+Platform Layer
+```
+
+## Platform Layer
+
+The platform layer handles operating-system-facing responsibilities.
+
+It is responsible for:
+
+* creating the window
+* initializing SDL2
+* handling keyboard input
+* tracking frame timing
+* presenting the framebuffer to the screen
+
+The platform layer does not know how triangles are rendered. It only displays the final framebuffer produced by the renderer.
+
+## Renderer
+
+The renderer controls the rendering process.
+
+It is responsible for:
+
+* storing the color buffer
+* storing the depth buffer
+* clearing buffers each frame
+* transforming vertices
+* projecting geometry
+* preparing triangles for rasterization
+* submitting triangles to the rasterizer
+
+The renderer acts as the main bridge between 3D scene data and low-level pixel drawing.
+
+## Rasterizer
+
+The rasterizer converts triangles into pixels.
+
+It is responsible for:
+
+* computing triangle bounding boxes
+* evaluating edge functions
+* calculating barycentric coordinates
+* interpolating depth values
+* writing visible pixels into the color buffer
+
+The rasterizer is one of the most important parts of WarpFrame because it is where mathematical geometry becomes visible pixels.
+
+## Math Layer
+
+The math layer contains the basic types and operations needed for 3D rendering.
+
+Common types include:
+
+```c
+vec2
+vec3
+vec4
+mat4
+```
+
+Common operations include:
+
+* vector addition
+* vector subtraction
+* matrix multiplication
+* identity matrix creation
+* translation matrices
+* rotation matrices
+* projection matrices
+* determinant calculations
+
+This layer keeps the renderer independent from external math libraries.
+
+## Typical Frame Flow
+
+A normal frame in WarpFrame follows this process:
+
+```text
+1. Poll input
+2. Clear color buffer
+3. Clear depth buffer
+4. Update camera or model transform
+5. Transform model vertices
+6. Project vertices into clip space
+7. Perform perspective divide
+8. Convert coordinates to screen space
+9. Rasterize triangles
+10. Perform depth testing
+11. Write pixels into framebuffer
+12. Present framebuffer through SDL2
+```
+
+This structure mirrors the classic graphics pipeline, but implemented manually in C.
+
+## Build
+
+WarpFrame uses C and SDL2.
+
+### Requirements
+
+* C compiler
+* Make
+* SDL2 development libraries
+
+On Fedora:
 
 ```bash
-git clone https://github.com/yourname/warpframe
-cd warpframe
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build -j
-./build/warpframe
+sudo dnf install gcc make SDL2-devel
 ```
 
-Run helper scripts (Linux/macOS):
+On Debian/Ubuntu:
 
 ```bash
-scripts/dev.sh      # Debug + run
-scripts/release.sh  # Release + run
-scripts/test.sh     # Run unit tests
-scripts/bench.sh    # Run microbenchmarks
-scripts/format.sh   # clang-format sources
+sudo apt install build-essential libsdl2-dev
 ```
 
-Windows: use `scripts/dev.sh` under Git-Bash or run CMake manually in PowerShell.
+### Compile
 
----
+```bash
+make
+```
 
-## Roadmap
+### Run
 
-- [x] Framebuffer + SDL2 present loop  
-- [x] Wireframe rendering  
-- [ ] Filled triangles with depth buffer  
-- [ ] Tile binning + multithreaded rasterizer  
-- [ ] Affine texturing + perspective toggle  
-- [ ] Dithering + fixed-point math pipeline  
-- [ ] SIMD accelerated spans  
-- [ ] Scene format, camera controls, demo assets  
-- [ ] Benchmarks, docs, public release  
+```bash
+./warpframe
+```
 
-Full detailed roadmap is in [`warpframe_todo.md`](./warpframe_todo.md).
+## Project Structure
 
----
+A typical WarpFrame source layout may look like this:
 
-## Why It’s Different
+```text
+include/
+    platform_sdl.h
+    c_renderer.h
+    c_rasterizer.h
+    m_type.h
+    m_util.h
 
-Most software rasterizers try to look like OpenGL. warpframe doesn’t. It embraces **imperfections**:
+src/
+    platform_sdl.c
+    c_renderer.c
+    c_rasterizer.c
+    m_util.c
+    main.c
+```
 
-- PS1-style affine warping.  
-- Precision loss by design.  
-- Dithered color output.  
+## Design Principles
 
-Yet, it also embraces **modern CPUs**: threads, vectorization, cache-friendly data layouts.
+WarpFrame follows a few simple design principles:
 
-This isn’t nostalgia. It’s a study in how to **abuse a CPU like a GPU**.
+* keep the pipeline visible
+* avoid unnecessary abstraction
+* keep rendering logic separate from platform code
+* prefer explicit C code
+* make every rendering step debuggable
+* build the renderer incrementally
+* keep the project close to how old software renderers worked
 
----
+## Why Software Rendering?
 
-## Performance
+Software rendering is useful because it makes the rendering pipeline understandable.
 
-warpframe aims to be fast enough to push 100k+ textured triangles at 60 FPS on a modern desktop CPU.  
+With a GPU API, many important details are hidden. With software rendering, every pixel is the result of code that exists inside the project.
 
-Benchmarks are tracked in CI. Expect charts soon.
+This makes WarpFrame valuable for learning:
 
----
+* how triangles are filled
+* how depth works
+* how projection works
+* how 3D coordinates become 2D pixels
+* how old renderers and early 3D consoles behaved
+* how performance problems appear at the pixel level
 
-## Tech Stack
+## Why PS1 Style?
 
-- **C++23** with `std::jthread`, `std::barrier`, `std::simd`.  
-- **SDL2** for window, input, texture blitting.  
-- **Dear ImGui** for HUD/UI.  
-- **fmt**, **stb**, **tinyobjloader**.  
-- **CMake + CPM** for dependency management.  
+The PlayStation 1 had a distinctive 3D look because of hardware limitations and rendering shortcuts.
 
----
+WarpFrame uses that style as a creative and technical target.
 
-## Contributing
+Instead of chasing photorealism, WarpFrame focuses on:
 
-This is a work in progress. PRs, issues, and experiments welcome.  
-If you want to hack on rasterizers, bring your profiler.
+* strong silhouettes
+* simple geometry
+* atmospheric low-poly scenes
+* visible rendering artifacts
+* nostalgic visual instability
+* readable, stylized 3D environments
 
----
+This makes the renderer suitable for experiments with retro horror, dungeon crawlers, soulslike prototypes, and low-poly 3D scenes.
+
+## Acknowledgements
+- [OpenGL Rendering Pipeline](https://www.songho.ca/opengl/gl_pipeline.html)
 
 ## License
 
-MIT. Free to use, fork, and experiment.
-
+License information will be added according to the intended distribution model of the project.
