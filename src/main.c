@@ -16,7 +16,12 @@ int main(int argc, char *argv[])
 	}
 
 	wf_obj_parsed_t *obj = wf_obj_parse(argv[1]);
-    
+
+	wf_obj_normalize(obj);
+
+	vec4f_t translated = m_mat4f_mul_vec4f(
+		m_mat4f_identity(), (vec4f_t){ 1.0f, 2.0f, 1.0f, 4.0f });
+
 	wf_platform_t *platform = NULL;
 
 	if (!wf_platform_init(&platform, WF_INTERNAL_WIDTH, WF_INTERNAL_HEIGHT,

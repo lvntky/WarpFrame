@@ -21,6 +21,8 @@ static int parse_face_index(const char *token)
 	return index - 1;
 }
 
+#define WF_MAX_LINE_LEN 2048
+
 wf_obj_parsed_t *wf_obj_parse(char *path)
 {
 	wf_obj_parsed_t *parsed;
@@ -33,8 +35,8 @@ wf_obj_parsed_t *wf_obj_parse(char *path)
 	int v_count = 0;
 	int f_count = 0;
 
-	char line[256];
-	while (fgets(line, 256, fp)) {
+	char line[WF_MAX_LINE_LEN];
+	while (fgets(line, WF_MAX_LINE_LEN, fp)) {
 		if (line[0] == 'v' && line[1] == ' ') {
 			v_count++;
 		} else if (line[0] == 'f' && line[1] == ' ') {
@@ -49,14 +51,14 @@ wf_obj_parsed_t *wf_obj_parse(char *path)
 
 	parsed = malloc(sizeof(wf_obj_parsed_t));
 	vec4f_t *vlist = malloc(v_count * sizeof(vec4f_t));
-	int *flist = malloc(f_count * sizeof(int));
+	int *flist = malloc(f_count * 3 * sizeof(int));
 
 	rewind(fp);
 
 	int vindex = 0;
 	int findex = 0;
 
-	while (fgets(line, 256, fp)) {
+	while (fgets(line, WF_MAX_LINE_LEN, fp)) {
 		if (line[0] == 'v' && line[1] == ' ') {
 			float x, y, z;
 			if (sscanf(line, "v %f %f %f", &x, &y, &z) == 3) {

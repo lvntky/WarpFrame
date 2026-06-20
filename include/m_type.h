@@ -47,10 +47,7 @@ typedef struct vec4f {
 } vec4f_t;
 
 typedef struct mat4f {
-	vec4f_t column1;
-	vec4f_t column2;
-	vec4f_t column3;
-	vec4f_t column4;
+	vec4f_t cols[4];
 } mat4f_t;
 
 #endif //M_TYPE_H_
