@@ -7,6 +7,7 @@
 #include <m_type.h>
 #include <string.h>
 #include <m_util.h>
+#include <wf_obj_parser.h>
 
 int main(int argc, char *argv[])
 {
@@ -14,6 +15,8 @@ int main(int argc, char *argv[])
 		fprintf(stdout, "%s running without loaded object", argv[0]);
 	}
 
+	wf_obj_parsed_t *obj = wf_obj_parse(argv[1]);
+    
 	wf_platform_t *platform = NULL;
 
 	if (!wf_platform_init(&platform, WF_INTERNAL_WIDTH, WF_INTERNAL_HEIGHT,

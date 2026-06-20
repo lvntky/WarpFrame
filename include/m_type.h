@@ -26,4 +26,31 @@ typedef struct mat4i {
 	vec4i_t column4;
 } mat4i_t;
 
+/* Float vector types */
+
+typedef struct vec2f {
+	float x;
+	float y;
+} vec2f_t;
+
+typedef struct vec3f {
+	float x;
+	float y;
+	float z;
+} vec3f_t;
+
+typedef struct vec4f {
+	float x;
+	float y;
+	float z;
+	float w; // homogeneous coordinate, for 3D translations
+} vec4f_t;
+
+typedef struct mat4f {
+	vec4f_t column1;
+	vec4f_t column2;
+	vec4f_t column3;
+	vec4f_t column4;
+} mat4f_t;
+
 #endif //M_TYPE_H_
