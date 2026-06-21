@@ -94,3 +94,12 @@ c_renderer_create_viewport_vertex(c_renderer_projected_vertex_t projected)
 		.z = screen_z,
 	};
 }
+
+
+bool c_renderer_backface_area(c_rasterizer_vertex_t a, c_rasterizer_vertex_t b, c_rasterizer_vertex_t c) {
+	float area =
+    (b.x - a.x) * (c.y - a.y) -
+    (b.y - a.y) * (c.x - a.x);
+
+	return (area > 0.0f); // it's on the back
+}

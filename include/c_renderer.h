@@ -37,4 +37,6 @@ bool c_renderer_create_projected_vertex(vec4f_t v, c_renderer_projected_vertex_t
 
 c_rasterizer_vertex_t c_renderer_create_viewport_vertex(c_renderer_projected_vertex_t projected);
 
+bool c_renderer_backface_area(c_rasterizer_vertex_t a, c_rasterizer_vertex_t b, c_rasterizer_vertex_t c);
+
 #endif //C_RENDERER_H_

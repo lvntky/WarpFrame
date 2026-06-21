@@ -115,27 +115,29 @@ static uint32_t depth_to_rgb_color(float z, float z_near, float z_far)
 
 float normalize_depth(float z, float near, float far)
 {
-    float t = (z - near) / (far - near);
+	float t = (z - near) / (far - near);
 
-    if (t < 0.0f) t = 0.0f;
-    if (t > 1.0f) t = 1.0f;
+	if (t < 0.0f)
+		t = 0.0f;
+	if (t > 1.0f)
+		t = 1.0f;
 
-    return t;
+	return t;
 }
 
 uint32_t color_from_depth(float z)
 {
-	z = normalize_depth(z, 0.0f, 5.0f);
-    if (z < 0.0f) z = 0.0f;
-    if (z > 1.0f) z = 1.0f;
+	z = normalize_depth(z, 0.1f, 10.0f);
+	if (z < 0.0f)
+		z = 0.0f;
+	if (z > 1.0f)
+		z = 1.0f;
 
-    uint8_t shade = (uint8_t)((1.0f - z) * 255.0f);
+	uint8_t shade = (uint8_t)((1.0f - z) * 255.0f);
 
-    return 0xff000000 |
-           (shade << 16) |
-           (shade << 8)  |
-           shade;
+	return 0xff000000 | (shade << 16) | (shade << 8) | shade;
 }
+
 // temprary ends here
 
 void c_rasterizer_put_pixel(c_renderer_t *renderer, int x, int y,
@@ -205,12 +207,11 @@ void c_rasterizer_draw_triangle_solid(c_renderer_t *renderer,
 				barycentric_t pbar =
 					barycentric_coordinate(triangle, p);
 				p.z = calculate_pixel_depth(triangle, pbar);
-				fprintf(stdout, "p.z: %f\n", p.z);
-				
 				if (p.z < renderer_depth[x]) {
 					renderer_depth[x] = p.z;
-					row[x] = color_from_depth(p.z);
-					//row[x] = color;
+					uint32_t depth_color =
+						color_from_depth(p.z);
+					row[x] = triangle.color;
 				}
 			}
 		}

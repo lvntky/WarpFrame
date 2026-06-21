@@ -10,6 +10,15 @@
 #include <wf_obj_parser.h>
 #include <stdlib.h>
 
+static uint32_t random_color(void)
+{
+	uint8_t r = 64 + rand() % 192;
+	uint8_t g = 64 + rand() % 192;
+	uint8_t b = 64 + rand() % 192;
+
+	return ((uint32_t)r << 16) | ((uint32_t)g << 8) | ((uint32_t)b);
+}
+
 static c_rasterizer_triangle_t *object_to_screen(wf_obj_parsed_t *obj)
 {
 	c_rasterizer_vertex_t screen_vertex_list[obj->vertex_count];
@@ -42,8 +51,10 @@ static c_rasterizer_triangle_t *object_to_screen(wf_obj_parsed_t *obj)
 		c_rasterizer_vertex_t b = screen_vertex_list[i1];
 		c_rasterizer_vertex_t c = screen_vertex_list[i2];
 
-		triangle_list[f] =
-			(c_rasterizer_triangle_t){ a, b, c, 0x00FF00 };
+		if (!c_renderer_backface_area(a, b, c)) {
+			triangle_list[f] =
+				(c_rasterizer_triangle_t){ a, b, c, random_color() };
+		}
 	}
 
 	return triangle_list;
