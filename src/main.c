@@ -8,6 +8,46 @@
 #include <string.h>
 #include <m_util.h>
 #include <wf_obj_parser.h>
+#include <stdlib.h>
+
+static c_rasterizer_triangle_t *object_to_screen(wf_obj_parsed_t *obj)
+{
+	c_rasterizer_vertex_t screen_vertex_list[obj->vertex_count];
+	c_rasterizer_triangle_t *triangle_list =
+		malloc(sizeof(c_rasterizer_triangle_t) * obj->face_count);
+
+	wf_obj_normalize(obj);
+	c_renderer_model_transform(obj, 0.0, 0.0, 5.0);
+
+	c_renderer_projected_vertex_t projected_vertex_list[obj->vertex_count];
+
+	for (int i = 0; i < obj->vertex_count; i++) {
+		c_renderer_create_projected_vertex(obj->vertices[i],
+						   &projected_vertex_list[i]);
+	}
+
+	for (int j = 0; j < obj->vertex_count; j++) {
+		screen_vertex_list[j] = c_renderer_create_viewport_vertex(
+			projected_vertex_list[j]);
+	}
+
+	int triangle_count = 0;
+
+	for (int f = 0; f < obj->face_count; f++) {
+		int i0 = obj->faces[f * 3 + 0];
+		int i1 = obj->faces[f * 3 + 1];
+		int i2 = obj->faces[f * 3 + 2];
+
+		c_rasterizer_vertex_t a = screen_vertex_list[i0];
+		c_rasterizer_vertex_t b = screen_vertex_list[i1];
+		c_rasterizer_vertex_t c = screen_vertex_list[i2];
+
+		triangle_list[f] =
+			(c_rasterizer_triangle_t){ a, b, c, 0x00FF00 };
+	}
+
+	return triangle_list;
+}
 
 int main(int argc, char *argv[])
 {
@@ -16,11 +56,6 @@ int main(int argc, char *argv[])
 	}
 
 	wf_obj_parsed_t *obj = wf_obj_parse(argv[1]);
-
-	wf_obj_normalize(obj);
-
-	vec4f_t translated = m_mat4f_mul_vec4f(
-		m_mat4f_identity(), (vec4f_t){ 1.0f, 2.0f, 1.0f, 4.0f });
 
 	wf_platform_t *platform = NULL;
 
@@ -36,13 +71,9 @@ int main(int argc, char *argv[])
 	c_renderer_t *renderer;
 	c_renderer_init(&renderer);
 
-	c_renderer_ndc_vertex_t ndc_v[] = {
-		{ 0.0f, 0.5f, 5.0f },
-		{ -0.5f, -0.5f, 5.0f },
-		{ 0.5f, -0.5f, 10.0f },
-	};
-
 	int counter = 0;
+
+	c_rasterizer_triangle_t *tri = object_to_screen(obj);
 
 	while (!input.quit) {
 		c_renderer_clean(renderer);
@@ -50,13 +81,11 @@ int main(int argc, char *argv[])
 		float dt = wf_platform_get_delta_time(platform);
 		time += dt;
 
-		c_rasterizer_triangle_t tri = {
-			c_renderer_viewport_transformation(ndc_v[0]),
-			c_renderer_viewport_transformation(ndc_v[1]),
-			c_renderer_viewport_transformation(ndc_v[2])
-		};
-
-		c_rasterizer_draw_triangle_solid(renderer, tri, 0xFF0000);
+		for (int i = 0; i < obj->face_count; i++) {
+			c_rasterizer_draw_triangle_solid(renderer, tri[i],
+							 0xFF00FF);
+		}
+		//c_rasterizer_draw_triangle_solid(renderer, tri, 0xFF0000);
 
 		wf_platform_present(platform, renderer->color_buffer);
 

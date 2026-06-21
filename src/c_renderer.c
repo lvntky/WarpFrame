@@ -57,3 +57,40 @@ c_renderer_viewport_transformation(c_renderer_ndc_vertex_t v)
 
 	return out;
 }
+
+void c_renderer_model_transform(wf_obj_parsed_t *obj, float x, float y, float z)
+{
+	for (int i = 0; i < obj->vertex_count; i++) {
+		obj->vertices[i].x += x;
+		obj->vertices[i].y += y;
+		obj->vertices[i].z += z;
+	}
+}
+
+bool c_renderer_create_projected_vertex(vec4f_t v,
+				 c_renderer_projected_vertex_t *vertex)
+{
+	if (v.z < 0.1f) {
+		return false;
+	}
+
+	vertex->x = v.x / v.z;
+	vertex->y = v.y / v.z;
+	vertex->z = v.z;
+
+	return vertex;
+}
+
+c_rasterizer_vertex_t
+c_renderer_create_viewport_vertex(c_renderer_projected_vertex_t projected)
+{
+	int screen_x = (projected.x + 1.0f) * 0.5f * WF_INTERNAL_WIDTH;
+	int screen_y = (1.0f - projected.y) * 0.5f * WF_INTERNAL_HEIGHT;
+	float screen_z = projected.z;
+
+	return (c_rasterizer_vertex_t){
+		.x = screen_x,
+		.y = screen_y,
+		.z = screen_z,
+	};
+}
