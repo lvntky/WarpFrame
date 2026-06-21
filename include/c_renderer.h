@@ -30,8 +30,8 @@ void c_renderer_shutdown(c_renderer_t *renderer);
 void c_renderer_clean(c_renderer_t *renderer);
 c_rasterizer_vertex_t
 c_renderer_viewport_transformation(c_renderer_ndc_vertex_t v);
-void c_renderer_model_transform(wf_obj_parsed_t *obj, float x, float y,
-				float z);
+vec4f_t *c_renderer_model_transform(vec4f_t *normalized, float x, float y,
+									float z, int vertex_count);
 
 bool c_renderer_create_projected_vertex(vec4f_t v, c_renderer_projected_vertex_t* vertex);
 

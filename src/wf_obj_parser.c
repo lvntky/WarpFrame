@@ -23,7 +23,7 @@ static int parse_face_index(const char *token)
 
 #define WF_MAX_LINE_LEN 2048
 
-wf_obj_parsed_t *wf_obj_parse(char *path)
+const wf_obj_parsed_t *wf_obj_parse(char *path)
 {
 	wf_obj_parsed_t *parsed;
 	FILE *fp = fopen(path, "r");
@@ -122,11 +122,13 @@ void wf_obj_debug_print(const wf_obj_parsed_t *o)
 	}
 }
 
-void wf_obj_normalize(wf_obj_parsed_t *obj)
+vec4f_t *wf_obj_normalize(wf_obj_parsed_t *obj)
 {
 	if (!obj || obj->vertex_count == 0)
-		return;
+		return NULL;
 
+	vec4f_t *normalized = malloc(obj->vertex_count * sizeof(vec4f_t));
+	
 	float min_x = obj->vertices[0].x, max_x = obj->vertices[0].x;
 	float min_y = obj->vertices[0].y, max_y = obj->vertices[0].y;
 	float min_z = obj->vertices[0].z, max_z = obj->vertices[0].z;
@@ -155,13 +157,16 @@ void wf_obj_normalize(wf_obj_parsed_t *obj)
 	if (size_y > size) size = size_y;
 	if (size_z > size) size = size_z;
 
-	if (size == 0.0f) return;
+	if (size == 0.0f) return NULL;
+	
 	float inv = 1.0f / size;
 
 	
 	for (int i = 0; i < obj->vertex_count; i++) {
-		obj->vertices[i].x = (obj->vertices[i].x - cx) * inv;
-		obj->vertices[i].y = (obj->vertices[i].y - cy) * inv;
-		obj->vertices[i].z = (obj->vertices[i].z - cz) * inv;
+		normalized[i].x = (obj->vertices[i].x - cx) * inv;
+		normalized[i].y = (obj->vertices[i].y - cy) * inv;
+		normalized[i].z = (obj->vertices[i].z - cz) * inv;
 	}
+
+	return normalized;
 }

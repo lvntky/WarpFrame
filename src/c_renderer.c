@@ -58,17 +58,30 @@ c_renderer_viewport_transformation(c_renderer_ndc_vertex_t v)
 	return out;
 }
 
-void c_renderer_model_transform(wf_obj_parsed_t *obj, float x, float y, float z)
+vec4f_t *c_renderer_model_transform(vec4f_t *normalized, float x, float y,
+				    float z, int vertex_count)
 {
-	for (int i = 0; i < obj->vertex_count; i++) {
-		obj->vertices[i].x += x;
-		obj->vertices[i].y += y;
-		obj->vertices[i].z += z;
+	vec4f_t *transformed = malloc(vertex_count * sizeof(vec4f_t));
+
+	for (int i = 0; i < vertex_count; i++) {
+		transformed[i] = normalized[i];
+
+		transformed[i].x += x;
+		transformed[i].y += y;
+		transformed[i].z += z;
 	}
+
+	for (int i = 0; i < vertex_count; i++) {
+		transformed[i].x += x;
+		transformed[i].y += y;
+		transformed[i].z += z;
+	}
+
+	return transformed;
 }
 
 bool c_renderer_create_projected_vertex(vec4f_t v,
-				 c_renderer_projected_vertex_t *vertex)
+					c_renderer_projected_vertex_t *vertex)
 {
 	if (v.z < 0.1f) {
 		return false;
@@ -95,11 +108,10 @@ c_renderer_create_viewport_vertex(c_renderer_projected_vertex_t projected)
 	};
 }
 
-
-bool c_renderer_backface_area(c_rasterizer_vertex_t a, c_rasterizer_vertex_t b, c_rasterizer_vertex_t c) {
-	float area =
-    (b.x - a.x) * (c.y - a.y) -
-    (b.y - a.y) * (c.x - a.x);
+bool c_renderer_backface_area(c_rasterizer_vertex_t a, c_rasterizer_vertex_t b,
+			      c_rasterizer_vertex_t c)
+{
+	float area = (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
 
 	return (area <= 0.0f); // it's on the back
 }
