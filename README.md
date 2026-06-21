@@ -1,5 +1,7 @@
 # WarpFrame
 
+![first render](./docs/first_render.gif)
+
 **WarpFrame** is a PS1-inspired software renderer written in C.
 
 It renders 3D geometry on the CPU without relying on modern GPU graphics APIs such as OpenGL, Vulkan, or DirectX. The project focuses on understanding the classic 3D rendering pipeline by implementing the core stages manually: transformation, projection, rasterization, depth testing, and framebuffer presentation.
