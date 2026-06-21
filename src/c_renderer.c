@@ -41,7 +41,7 @@ void c_renderer_shutdown(c_renderer_t *renderer)
 }
 void c_renderer_clean(c_renderer_t *renderer)
 {
-	for (int i = 0; i < renderer->data_len; i++) {
+	for (size_t i = 0; i < renderer->data_len; i++) {
 		renderer->color_buffer[i] = 0x000000;
 		renderer->depth_buffer[i] = FLT_MAX;
 	}

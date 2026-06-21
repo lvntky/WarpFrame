@@ -11,7 +11,7 @@ mat4i_t *m_mat4i_create()
 {
 	mat4i_t *mat = calloc(4, sizeof(mat4i_t));
 	if (!mat) {
-		fprintf(stderr, "unable to create 4x4 matrix mat4i_t.", NULL);
+		fprintf(stderr, "unable to create 4x4 matrix mat4i_t.");
 	}
 	return mat;
 }

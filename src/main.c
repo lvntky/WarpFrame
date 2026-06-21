@@ -130,11 +130,10 @@ int main(int argc, char *argv[])
 
 		c_rasterizer_triangle_t *tri = object_to_screen(
 			normalized_obj_vertices, faces, vertex_count,
-			face_count, &triangle_count, rotation_angle+0.05f);
+			face_count, &triangle_count, rotation_angle + 0.05f);
 
 		for (int i = 0; i < triangle_count; i++) {
-			c_rasterizer_draw_triangle_solid(renderer, tri[i],
-							 0xFF00FF);
+			c_rasterizer_draw_triangle_solid(renderer, tri[i]);
 		}
 		//c_rasterizer_draw_triangle_solid(renderer, tri, 0xFF0000);
 

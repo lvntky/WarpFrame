@@ -10,7 +10,7 @@ typedef struct bounding_box_t bounding_box_t;
 void c_rasterizer_put_pixel(c_renderer_t *renderer, int x, int y,
 			    uint32_t color);
 void c_rasterizer_draw_triangle_solid(c_renderer_t *renderer,
-				      c_rasterizer_triangle_t triangle, uint32_t color);
+				      c_rasterizer_triangle_t triangle);
 
 bounding_box_t
 c_rasterizer_triange_calculate_bounding_box(c_rasterizer_triangle_t triangle);

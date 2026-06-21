@@ -85,34 +85,6 @@ static bool is_point_inside_triange(c_rasterizer_triangle_t triangle,
 }
 
 // todo: temporart will delete
-static uint32_t depth_to_gray(float z, float z_near, float z_far)
-{
-	float t = (z - z_near) / (z_far - z_near);
-	if (t < 0.0f)
-		t = 0.0f;
-	if (t > 1.0f)
-		t = 1.0f;
-
-	uint8_t g = (uint8_t)(t * 255.0f + 1.5f);
-	return (g << 16) | (g << 8) | g; // 0x00RRGGBB
-}
-
-static uint32_t depth_to_rgb_color(float z, float z_near, float z_far)
-{
-	float t = (z - z_near) / (z_far - z_near);
-
-	if (t < 0.0f)
-		t = 0.0f;
-	if (t > 1.0f)
-		t = 1.0f;
-
-	uint8_t r = (uint8_t)((1.0f - t) * 255.0f);
-	uint8_t g = 0;
-	uint8_t b = (uint8_t)(t * 255.0f);
-
-	return ((uint32_t)r << 16) | ((uint32_t)g << 8) | ((uint32_t)b);
-}
-
 float normalize_depth(float z, float near, float far)
 {
 	float t = (z - near) / (far - near);
@@ -172,8 +144,7 @@ c_rasterizer_triange_calculate_bounding_box(c_rasterizer_triangle_t triangle)
 }
 
 void c_rasterizer_draw_triangle_solid(c_renderer_t *renderer,
-				      c_rasterizer_triangle_t triangle,
-				      uint32_t color)
+				      c_rasterizer_triangle_t triangle)
 {
 	bounding_box_t box =
 		c_rasterizer_triange_calculate_bounding_box(triangle);

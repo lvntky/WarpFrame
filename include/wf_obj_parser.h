@@ -12,6 +12,6 @@ typedef struct wf_obj_parsed {
 
 const wf_obj_parsed_t *wf_obj_parse(char *path);
 void wf_obj_debug_print(const wf_obj_parsed_t *o);
-vec4f_t *wf_obj_normalize(wf_obj_parsed_t *obj);
+vec4f_t *wf_obj_normalize(const wf_obj_parsed_t *obj);
 
 #endif //WF_OBJ_PARSER_H_
