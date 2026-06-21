@@ -17,7 +17,7 @@ static c_rasterizer_triangle_t *object_to_screen(wf_obj_parsed_t *obj)
 		malloc(sizeof(c_rasterizer_triangle_t) * obj->face_count);
 
 	wf_obj_normalize(obj);
-	c_renderer_model_transform(obj, 0.0, 0.0, 5.0);
+	c_renderer_model_transform(obj, 0.0, 0.0, 1.0);
 
 	c_renderer_projected_vertex_t projected_vertex_list[obj->vertex_count];
 

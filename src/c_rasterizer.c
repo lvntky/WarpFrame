@@ -125,7 +125,7 @@ float normalize_depth(float z, float near, float far)
 
 uint32_t color_from_depth(float z)
 {
-	z = normalize_depth(z, 0.0f, 20.0f);
+	z = normalize_depth(z, 0.0f, 5.0f);
     if (z < 0.0f) z = 0.0f;
     if (z > 1.0f) z = 1.0f;
 
@@ -205,7 +205,8 @@ void c_rasterizer_draw_triangle_solid(c_renderer_t *renderer,
 				barycentric_t pbar =
 					barycentric_coordinate(triangle, p);
 				p.z = calculate_pixel_depth(triangle, pbar);
-
+				fprintf(stdout, "p.z: %f\n", p.z);
+				
 				if (p.z < renderer_depth[x]) {
 					renderer_depth[x] = p.z;
 					row[x] = color_from_depth(p.z);
