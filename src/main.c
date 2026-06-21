@@ -19,7 +19,7 @@ static uint32_t random_color(void)
 	return ((uint32_t)r << 16) | ((uint32_t)g << 8) | ((uint32_t)b);
 }
 
-static c_rasterizer_triangle_t *object_to_screen(wf_obj_parsed_t *obj)
+static c_rasterizer_triangle_t *object_to_screen(const wf_obj_parsed_t *obj, int *out_count)
 {
 	c_rasterizer_vertex_t screen_vertex_list[obj->vertex_count];
 	c_rasterizer_triangle_t *triangle_list =
@@ -52,11 +52,13 @@ static c_rasterizer_triangle_t *object_to_screen(wf_obj_parsed_t *obj)
 		c_rasterizer_vertex_t c = screen_vertex_list[i2];
 
 		if (!c_renderer_backface_area(a, b, c)) {
-			triangle_list[f] =
+			triangle_list[triangle_count++] =
 				(c_rasterizer_triangle_t){ a, b, c, random_color() };
 		}
 	}
 
+	*out_count = triangle_count;
+	
 	return triangle_list;
 }
 
@@ -66,7 +68,7 @@ int main(int argc, char *argv[])
 		fprintf(stdout, "%s running without loaded object", argv[0]);
 	}
 
-	wf_obj_parsed_t *obj = wf_obj_parse(argv[1]);
+	const wf_obj_parsed_t *obj = wf_obj_parse(argv[1]);
 
 	wf_platform_t *platform = NULL;
 
@@ -84,7 +86,8 @@ int main(int argc, char *argv[])
 
 	int counter = 0;
 
-	c_rasterizer_triangle_t *tri = object_to_screen(obj);
+	int triangle_count = 0;
+	c_rasterizer_triangle_t *tri = object_to_screen(obj, &triangle_count);
 
 	while (!input.quit) {
 		c_renderer_clean(renderer);
@@ -92,7 +95,7 @@ int main(int argc, char *argv[])
 		float dt = wf_platform_get_delta_time(platform);
 		time += dt;
 
-		for (int i = 0; i < obj->face_count; i++) {
+		for (int i = 0; i < triangle_count; i++) {
 			c_rasterizer_draw_triangle_solid(renderer, tri[i],
 							 0xFF00FF);
 		}

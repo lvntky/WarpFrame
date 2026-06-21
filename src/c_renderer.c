@@ -101,5 +101,5 @@ bool c_renderer_backface_area(c_rasterizer_vertex_t a, c_rasterizer_vertex_t b, 
     (b.x - a.x) * (c.y - a.y) -
     (b.y - a.y) * (c.x - a.x);
 
-	return (area > 0.0f); // it's on the back
+	return (area <= 0.0f); // it's on the back
 }
