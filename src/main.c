@@ -40,13 +40,11 @@ static uint32_t random_color(void)
   temp code end
  */
 
-static c_rasterizer_triangle_t *
-object_to_screen(vec4f_t *normalized_obj_vertices, int *faces, int vertex_count,
-		 int face_count, int *out_count, float angle)
+void object_to_screen(vec4f_t *normalized_obj_vertices, int *faces,
+		      int vertex_count, int face_count, int *out_count,
+		      float angle, c_rasterizer_triangle_t *triangle_list)
 {
 	c_rasterizer_vertex_t screen_vertex_list[vertex_count];
-	c_rasterizer_triangle_t *triangle_list =
-		malloc(sizeof(c_rasterizer_triangle_t) * face_count);
 
 	for (int r = 0; r < vertex_count; r++) {
 		normalized_obj_vertices[r] =
@@ -87,8 +85,6 @@ object_to_screen(vec4f_t *normalized_obj_vertices, int *faces, int vertex_count,
 	}
 
 	*out_count = triangle_count;
-
-	return triangle_list;
 }
 
 int main(int argc, char *argv[])
@@ -122,15 +118,17 @@ int main(int argc, char *argv[])
 	int *faces = obj->faces;
 	float rotation_angle = 0.0f;
 
+	c_rasterizer_triangle_t *tri =
+		malloc(vertex_count * sizeof(c_rasterizer_triangle_t));
 	while (!input.quit) {
 		c_renderer_clean(renderer);
 		wf_platform_poll_input(&input);
 		float dt = wf_platform_get_delta_time(platform);
 		time += dt;
 
-		c_rasterizer_triangle_t *tri = object_to_screen(
-			normalized_obj_vertices, faces, vertex_count,
-			face_count, &triangle_count, rotation_angle + 0.05f);
+		object_to_screen(normalized_obj_vertices, faces,
+				       vertex_count, face_count,
+						 &triangle_count, rotation_angle + 0.05f, tri);
 
 		for (int i = 0; i < triangle_count; i++) {
 			c_rasterizer_draw_triangle_solid(renderer, tri[i]);
