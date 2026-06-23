@@ -91,6 +91,7 @@ int main(int argc, char *argv[])
 {
 	if (argc < 2) {
 		fprintf(stdout, "%s running without loaded object", argv[0]);
+		goto exit;
 	}
 
 	const wf_obj_parsed_t *obj = wf_obj_parse(argv[1]);
@@ -104,12 +105,9 @@ int main(int argc, char *argv[])
 	}
 
 	wf_input_t input = { 0 };
-	float time = 0.0f;
 
 	c_renderer_t *renderer;
 	c_renderer_init(&renderer);
-
-	int counter = 0;
 
 	int triangle_count = 0;
 	vec4f_t *normalized_obj_vertices = wf_obj_normalize(obj);
@@ -123,24 +121,19 @@ int main(int argc, char *argv[])
 	while (!input.quit) {
 		c_renderer_clean(renderer);
 		wf_platform_poll_input(&input);
-		float dt = wf_platform_get_delta_time(platform);
-		time += dt;
 
-		object_to_screen(normalized_obj_vertices, faces,
-				       vertex_count, face_count,
-						 &triangle_count, rotation_angle + 0.05f, tri);
+		object_to_screen(normalized_obj_vertices, faces, vertex_count,
+				 face_count, &triangle_count,
+				 rotation_angle + 0.05f, tri);
 
 		for (int i = 0; i < triangle_count; i++) {
 			c_rasterizer_draw_triangle_solid(renderer, tri[i]);
 		}
-		//c_rasterizer_draw_triangle_solid(renderer, tri, 0xFF0000);
 
 		wf_platform_present(platform, renderer->color_buffer);
-
-		counter += 1;
 	}
 
 	wf_platform_shutdown(platform);
-
+exit:
 	return 0;
 }

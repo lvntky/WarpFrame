@@ -2,5 +2,4 @@ build/
 cmake/CPM.cmake
 warpframe
 TAGS
-TODO.md
 assets/
