@@ -9,6 +9,7 @@
 #include <m_util.h>
 #include <wf_obj_parser.h>
 #include <stdlib.h>
+#include <wf_e_orientation.h>
 
 /*
   temp code start
@@ -16,13 +17,8 @@
 
 static vec4f_t rotate_y(vec4f_t v, float angle)
 {
-	float c = cosf(angle);
-	float s = sinf(angle);
-
 	vec4f_t out = v;
-
-	out.x = v.x * c + v.z * s;
-	out.z = -v.x * s + v.z * c;
+	out = m_mat4f_mul_vec4f(m_mat4f_rotate(angle, ROTATE_Y), out);
 
 	return out;
 }

@@ -87,9 +87,9 @@
 [x] perspective divide
 [x] viewport transform
 
-[ ] mat4_identity
-[ ] mat4_mul
-[ ] mat4_mul_vec4
+[x] mat4_identity
+[x] mat4_mul
+[x] mat4_mul_vec4
 [ ] mat4_rotation_y
 [ ] mat4_translation
 [ ] mat4_perspective

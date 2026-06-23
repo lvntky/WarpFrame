@@ -47,7 +47,7 @@ typedef struct vec4f {
 } vec4f_t;
 
 typedef struct mat4f {
-	vec4f_t cols[4];
+	float m[4][4];
 } mat4f_t;
 
 #endif //M_TYPE_H_
