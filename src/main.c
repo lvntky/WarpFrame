@@ -18,9 +18,16 @@
 static vec4f_t rotate_y(vec4f_t v, float angle)
 {
 	vec4f_t out = v;
-	out = m_mat4f_mul_vec4f(m_mat4f_rotate(angle, ROTATE_Y), out);
+	out = m_mat4f_mul_vec4f(m_mat4f_rotate(angle, ROTATE_X), out);
 
 	return out;
+}
+
+static vec4f_t transform(vec4f_t original, vec4f_t transform)
+{
+	mat4f_t t = m_mat4f_transform(transform);
+	original.w = 1.0f;
+	return m_mat4f_mul_vec4f(t, original);
 }
 
 static uint32_t random_color(void)
@@ -47,8 +54,16 @@ void object_to_screen(vec4f_t *normalized_obj_vertices, int *faces,
 			rotate_y(normalized_obj_vertices[r], angle);
 	}
 
-	vec4f_t *transformed_obj_vertices = c_renderer_model_transform(
-		normalized_obj_vertices, 0.0, 0.0, 0.3, vertex_count);
+	//vec4f_t *transformed_obj_vertices = c_renderer_model_transform(
+	//	normalized_obj_vertices, 0.0, 0.0, 0.3, vertex_count);
+
+	vec4f_t *transformed_obj_vertices =
+		malloc(vertex_count * sizeof(vec4f_t));
+	for (int t = 0; t < vertex_count; t++) {
+		transformed_obj_vertices[t] =
+			transform(normalized_obj_vertices[t],
+				  (vec4f_t){ 0.0, 0.05, 0.7, 1.0 });
+	}
 
 	c_renderer_projected_vertex_t projected_vertex_list[vertex_count];
 

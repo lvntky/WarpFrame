@@ -101,3 +101,19 @@ mat4f_t m_mat4f_rotate(float angle, ERotationOrientation orientation)
 
 	return r;
 }
+
+mat4f_t m_mat4f_transform(vec4f_t transformation)
+{
+	mat4f_t out = m_mat4f_identity();
+
+	out.m[0][3] = transformation.x;
+	out.m[1][3] = transformation.y;
+	out.m[2][3] = transformation.z;
+
+	return out;
+}
+
+vec4f_t m_vec4f_mul(vec4f_t a, vec4f_t b)
+{
+	return (vec4f_t){ a.x * b.x, a.y * b.y, a.z * b.z, a.w * b.w };
+}

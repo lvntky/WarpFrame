@@ -90,8 +90,8 @@
 [x] mat4_identity
 [x] mat4_mul
 [x] mat4_mul_vec4
-[ ] mat4_rotation_y
-[ ] mat4_translation
+[x] mat4_rotation_y
+[x] mat4_translation
 [ ] mat4_perspective
 [ ] replace manual rotate_y with matrix rotation
 [ ] replace manual z += 5 with translation matrix
