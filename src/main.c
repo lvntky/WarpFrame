@@ -14,22 +14,6 @@
 /*
   temp code start
  */
-
-static vec4f_t rotate_y(vec4f_t v, float angle)
-{
-	vec4f_t out = v;
-	out = m_mat4f_mul_vec4f(m_mat4f_rotate(angle, ROTATE_X), out);
-
-	return out;
-}
-
-static vec4f_t transform(vec4f_t original, vec4f_t transform)
-{
-	mat4f_t t = m_mat4f_transform(transform);
-	original.w = 1.0f;
-	return m_mat4f_mul_vec4f(t, original);
-}
-
 static uint32_t random_color(void)
 {
 	uint8_t r = 64 + rand() % 192;
@@ -47,34 +31,50 @@ void object_to_screen(vec4f_t *normalized_obj_vertices, int *faces,
 		      int vertex_count, int face_count, int *out_count,
 		      float angle, c_rasterizer_triangle_t *triangle_list)
 {
+	vec4f_t view_vertex_list[vertex_count];
+	c_renderer_projected_vertex_t projected_vertex_list[vertex_count];
 	c_rasterizer_vertex_t screen_vertex_list[vertex_count];
 
-	for (int r = 0; r < vertex_count; r++) {
-		normalized_obj_vertices[r] =
-			rotate_y(normalized_obj_vertices[r], angle);
-	}
+	// Model Matrix
+	mat4f_t model_rotation = m_mat4f_rotate(angle, ROTATE_Y);
+	mat4f_t model_translation =
+		m_mat4f_transform((vec4f_t){ 0.0f, 0.05f, 0.7f, 1.0f });
 
-	//vec4f_t *transformed_obj_vertices = c_renderer_model_transform(
-	//	normalized_obj_vertices, 0.0, 0.0, 0.3, vertex_count);
-
-	vec4f_t *transformed_obj_vertices =
-		malloc(vertex_count * sizeof(vec4f_t));
-	for (int t = 0; t < vertex_count; t++) {
-		transformed_obj_vertices[t] =
-			transform(normalized_obj_vertices[t],
-				  (vec4f_t){ 0.0, 0.05, 0.7, 1.0 });
-	}
-
-	c_renderer_projected_vertex_t projected_vertex_list[vertex_count];
+	// View Matrix
+	// the camrera at the origin = identity matrix
+	mat4f_t view = m_mat4f_identity();
 
 	for (int i = 0; i < vertex_count; i++) {
-		c_renderer_create_projected_vertex(transformed_obj_vertices[i],
+		vec4f_t local = normalized_obj_vertices[i];
+		local.w = 1.0f;
+
+		// model -> local to world
+		// rotate than transfor on screen
+		vec4f_t world = m_mat4f_mul_vec4f(model_rotation, local);
+		world = m_mat4f_mul_vec4f(model_translation, world);
+
+		// world to view/screen
+		vec4f_t view_space = m_mat4f_mul_vec4f(view, world);
+
+		view_vertex_list[i] = view_space;
+	}
+
+	/*
+	  PROJECTION:
+	  view space -> projected/NDC 
+	*/
+	for (int i = 0; i < vertex_count; i++) {
+		c_renderer_create_projected_vertex(view_vertex_list[i],
 						   &projected_vertex_list[i]);
 	}
 
-	for (int j = 0; j < vertex_count; j++) {
-		screen_vertex_list[j] = c_renderer_create_viewport_vertex(
-			projected_vertex_list[j]);
+	/*
+	  VIEWPORT:
+	  projected -> screen
+	*/
+	for (int i = 0; i < vertex_count; i++) {
+		screen_vertex_list[i] = c_renderer_create_viewport_vertex(
+			projected_vertex_list[i]);
 	}
 
 	int triangle_count = 0;
@@ -128,20 +128,23 @@ int main(int argc, char *argv[])
 	float rotation_angle = 0.0f;
 
 	c_rasterizer_triangle_t *tri =
-		malloc(vertex_count * sizeof(c_rasterizer_triangle_t));
+		malloc(face_count * sizeof(c_rasterizer_triangle_t));
+
 	while (!input.quit) {
 		c_renderer_clean(renderer);
 		wf_platform_poll_input(&input);
 
 		object_to_screen(normalized_obj_vertices, faces, vertex_count,
-				 face_count, &triangle_count,
-				 rotation_angle + 0.05f, tri);
+				 face_count, &triangle_count, rotation_angle,
+				 tri);
 
 		for (int i = 0; i < triangle_count; i++) {
 			c_rasterizer_draw_triangle_solid(renderer, tri[i]);
 		}
 
 		wf_platform_present(platform, renderer->color_buffer);
+
+		rotation_angle += 0.05f;
 	}
 
 	wf_platform_shutdown(platform);
