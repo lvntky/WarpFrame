@@ -7,6 +7,7 @@
 #include <m_type.h>
 #include <m_util.h>
 #include <limits.h>
+#include <wf_texture.h>
 
 typedef struct bounding_box_t {
 	vec2i_t top_left;
@@ -143,8 +144,19 @@ c_rasterizer_triange_calculate_bounding_box(c_rasterizer_triangle_t triangle)
 	return box;
 }
 
+float interpolate_texture_u(c_rasterizer_triangle_t tri, barycentric_t pbar)
+{
+	return tri.a.u * pbar.l0 + tri.b.u * pbar.l1 + tri.c.u * pbar.l2;
+}
+
+float interpolate_texture_v(c_rasterizer_triangle_t tri, barycentric_t pbar)
+{
+	return tri.a.v * pbar.l0 + tri.b.v * pbar.l1 + tri.c.v * pbar.l2;
+}
+
 void c_rasterizer_draw_triangle_solid(c_renderer_t *renderer,
-				      c_rasterizer_triangle_t triangle)
+				      c_rasterizer_triangle_t triangle,
+				      wf_texture_t *texture)
 {
 	bounding_box_t box =
 		c_rasterizer_triange_calculate_bounding_box(triangle);
@@ -178,14 +190,26 @@ void c_rasterizer_draw_triangle_solid(c_renderer_t *renderer,
 				barycentric_t pbar =
 					barycentric_coordinate(triangle, p);
 				p.z = calculate_pixel_depth(triangle, pbar);
-				//fprintf(stdout, "p.z: %f\n", p.z);
+				float texture_pu =
+					interpolate_texture_u(triangle, pbar);
+				float texture_pv =
+					interpolate_texture_v(triangle, pbar);
+
+				int tex_u = texture_pu * texture->width;
+				int tex_v = texture_pv * texture->height;
+
+				fprintf(stdout, "vertex.a.u:%f\ttex_u:%d\tex_v:%d\tcolor:%d\n",triangle.a.u,
+					tex_u, tex_v,
+					tex_v * texture->width + tex_u);
 
 				if (p.z < renderer_depth[x]) {
 					renderer_depth[x] = p.z;
 					uint32_t depth_color =
 						color_from_depth(p.z);
-					//row[x] = triangle.color;
-					row[x] = depth_color;
+					row[x] =
+						texture->data
+							[tex_v * texture->width +
+							 tex_u];
 				}
 			}
 		}

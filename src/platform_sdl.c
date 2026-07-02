@@ -21,6 +21,9 @@ struct wf_platform_t {
 bool wf_platform_init(wf_platform_t **out_platform, int interal_width,
 		      int internal_height, int scale)
 {
+#ifdef WF_DEBUG
+	SDL_SetHint(SDL_HINT_WINDOWS_DISABLE_THREAD_NAMING, "1");
+#endif
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0) {
 		fprintf(stderr, "SDL_Init failed: %s\n", SDL_GetError());
 		return false;
@@ -162,10 +165,10 @@ float wf_platform_get_delta_time(wf_platform_t *platform)
 }
 
 void wf_platform_present_framebuffer(wf_platform_t *platform,
-                                     const uint32_t *framebuffer)
+				     const uint32_t *framebuffer)
 {
-    SDL_UpdateTexture(platform->framebuffer_texture, NULL, framebuffer,
-                      platform->internal_width * sizeof(uint32_t));
-    SDL_RenderCopy(platform->renderer, platform->framebuffer_texture,
-                   NULL, NULL);
+	SDL_UpdateTexture(platform->framebuffer_texture, NULL, framebuffer,
+			  platform->internal_width * sizeof(uint32_t));
+	SDL_RenderCopy(platform->renderer, platform->framebuffer_texture, NULL,
+		       NULL);
 }
