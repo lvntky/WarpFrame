@@ -198,10 +198,6 @@ void c_rasterizer_draw_triangle_solid(c_renderer_t *renderer,
 				int tex_u = texture_pu * texture->width;
 				int tex_v = texture_pv * texture->height;
 
-				fprintf(stdout, "vertex.a.u:%f\ttex_u:%d\tex_v:%d\tcolor:%d\n",triangle.a.u,
-					tex_u, tex_v,
-					tex_v * texture->width + tex_u);
-
 				if (p.z < renderer_depth[x]) {
 					renderer_depth[x] = p.z;
 					uint32_t depth_color =

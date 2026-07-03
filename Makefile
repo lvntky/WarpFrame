@@ -4,9 +4,10 @@ TARGET  := warpframe
 SRC_DIR   := src
 INC_DIR   := include
 BUILD_DIR := build
+VENDOR_DIR:= vendor
 
 CFLAGS  := -std=c11 -Wall -Wextra -Wpedantic -O2 -g
-CFLAGS  += -I$(INC_DIR)
+CFLAGS  += -I$(INC_DIR) -I$(VENDOR_DIR)/include
 
 LDFLAGS := -lSDL2 -lpthread -lm
 

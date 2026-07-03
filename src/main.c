@@ -33,7 +33,7 @@ void object_to_screen(vec4f_t *normalized_obj_vertices, wf_face_t *faces,
 	mat4f_t model_rotation = m_mat4f_rotate(angle, ROTATE_Y);
 
 	mat4f_t model_translation =
-		m_mat4f_transform((vec4f_t){ 0.0f, 0.00f, 1.0f, 1.0f });
+		m_mat4f_transform((vec4f_t){ 0.0f, 0.00f, 2.0f, 1.0f });
 
 	mat4f_t view = m_mat4f_identity();
 
@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
 
 	const wf_obj_parsed_t *obj = wf_obj_parse(argv[1]);
 
-	const wf_texture_t *tex = load_texture("");
+	const wf_texture_t *tex = load_texture(argv[2]);
 
 	if (tex == NULL) {
 #ifdef WF_DEBUG
