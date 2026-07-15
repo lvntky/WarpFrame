@@ -37,7 +37,7 @@ bool wf_platform_init(wf_platform_t **out_platform, int interal_width,
 
 	platform->internal_width = interal_width;
 	platform->internal_height = internal_height;
-	platform->window_width = interal_width * scale;
+	platform->window_width = interal_width * scale + WF_CONTROL_PANEL_WIDTH;
 	platform->window_height = internal_height * scale;
 
 	platform->window =
@@ -71,11 +71,17 @@ bool wf_platform_init(wf_platform_t **out_platform, int interal_width,
 		SDL_TEXTUREACCESS_STREAMING, platform->internal_width,
 		platform->internal_height);
 
-	//TODO: check texture
+	if (!platform->framebuffer_texture) {
+		fprintf(stderr, "SDL_CreateTexture failed: %s\n",
+			SDL_GetError());
+		SDL_DestroyRenderer(platform->renderer);
+		SDL_DestroyWindow(platform->window);
+		free(platform);
+		SDL_Quit();
+		return false;
+	}
 
-	SDL_RenderSetLogicalSize(platform->renderer, platform->internal_width,
-				 platform->internal_height);
-
+	SDL_RenderSetLogicalSize(platform->renderer, 0, 0);
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
 
 	platform->last_counter = SDL_GetPerformanceCounter();
@@ -90,6 +96,10 @@ void wf_platform_shutdown(wf_platform_t *platform)
 {
 	if (!platform) {
 		return;
+	}
+
+	if (platform->framebuffer_texture) {
+		SDL_DestroyTexture(platform->framebuffer_texture);
 	}
 
 	if (platform->renderer) {
@@ -110,42 +120,6 @@ void wf_platform_clear(wf_platform_t *platform, uint8_t r, uint8_t g, uint8_t b)
 	SDL_RenderClear(platform->renderer);
 }
 
-void wf_platform_poll_input(wf_input_t *input)
-{
-	input->key_up = false;
-	input->key_down = false;
-	input->key_left = false;
-	input->key_right = false;
-	input->key_escape = false;
-
-	SDL_Event event;
-
-	while (SDL_PollEvent(&event)) {
-		if (event.type == SDL_QUIT) {
-			input->quit = true;
-		}
-
-		if (event.type == SDL_KEYDOWN) {
-			SDL_KeyCode key = event.key.keysym.sym;
-			if (key == SDLK_ESCAPE) {
-				input->quit = true;
-				input->key_escape = true;
-			}
-		}
-
-		const uint8_t *keyboard = SDL_GetKeyboardState(NULL);
-
-		input->key_up = keyboard[SDL_SCANCODE_W] ||
-				keyboard[SDL_SCANCODE_UP];
-		input->key_down = keyboard[SDL_SCANCODE_S] ||
-				  keyboard[SDL_SCANCODE_DOWN];
-		input->key_left = keyboard[SDL_SCANCODE_A] ||
-				  keyboard[SDL_SCANCODE_LEFT];
-		input->key_right = keyboard[SDL_SCANCODE_D] ||
-				   keyboard[SDL_SCANCODE_RIGHT];
-	}
-}
-
 void wf_platform_present(wf_platform_t *platform, uint32_t *frame_data)
 {
 	wf_platform_present_framebuffer(platform, frame_data);
@@ -164,11 +138,53 @@ float wf_platform_get_delta_time(wf_platform_t *platform)
 	return platform->delta_time;
 }
 
+SDL_Rect wf_platform_get_render_rect(wf_platform_t *platform)
+{
+	SDL_Rect r;
+	r.x = WF_CONTROL_PANEL_WIDTH;
+	r.y = 0;
+	r.w = platform->window_width - WF_CONTROL_PANEL_WIDTH;
+	r.h = platform->window_height;
+	return r;
+}
+
+SDL_Rect wf_platform_get_panel_rect(wf_platform_t *platform)
+{
+	SDL_Rect r = { 0, 0, WF_CONTROL_PANEL_WIDTH, platform->window_height };
+	return r;
+}
+
 void wf_platform_present_framebuffer(wf_platform_t *platform,
 				     const uint32_t *framebuffer)
 {
 	SDL_UpdateTexture(platform->framebuffer_texture, NULL, framebuffer,
 			  platform->internal_width * sizeof(uint32_t));
+	SDL_Rect dst = wf_platform_get_render_rect(platform);
 	SDL_RenderCopy(platform->renderer, platform->framebuffer_texture, NULL,
-		       NULL);
+		       &dst);
+}
+
+void wf_platform_begin_ui(wf_platform_t *platform)
+{
+	(void)platform;
+}
+
+void wf_platform_end_ui(wf_platform_t *platform)
+{
+	(void)platform;
+}
+
+SDL_Renderer *wf_platform_get_renderer(wf_platform_t *platform)
+{
+	return platform->renderer;
+}
+
+int wf_platform_get_window_width(wf_platform_t *platform)
+{
+	return platform->window_width;
+}
+
+int wf_platform_get_window_height(wf_platform_t *platform)
+{
+	return platform->window_height;
 }

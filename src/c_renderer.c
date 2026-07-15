@@ -8,14 +8,24 @@
 int c_renderer_init(c_renderer_t **renderer)
 {
 	c_renderer_t *irnd = malloc(sizeof(c_renderer_t));
-	irnd->data_len = WF_INTERNAL_WIDTH * WF_INTERNAL_HEIGHT;
+	if (!irnd)
+		return -1;
 
+	irnd->data_len = WF_INTERNAL_WIDTH * WF_INTERNAL_HEIGHT;
 	irnd->framebuffer = calloc(irnd->data_len, sizeof(uint32_t));
 	irnd->color_buffer = calloc(irnd->data_len, sizeof(uint32_t));
 	irnd->depth_buffer = malloc(irnd->data_len * sizeof(float));
 
-	memset(irnd->depth_buffer, INT_MAX,
-	       irnd->data_len * (sizeof(uint32_t)));
+	if (!irnd->framebuffer || !irnd->color_buffer || !irnd->depth_buffer) {
+		free(irnd->framebuffer);
+		free(irnd->color_buffer);
+		free(irnd->depth_buffer);
+		free(irnd);
+		return -1;
+	}
+
+	for (size_t i = 0; i < irnd->data_len; i++)
+		irnd->depth_buffer[i] = FLT_MAX;
 
 	*renderer = irnd;
 	return 0;
@@ -26,19 +36,17 @@ void c_renderer_shutdown(c_renderer_t *renderer)
 	if (renderer->framebuffer != NULL) {
 		free(renderer->framebuffer);
 	}
-
 	if (renderer->color_buffer != NULL) {
 		free(renderer->color_buffer);
 	}
-
 	if (renderer->depth_buffer != NULL) {
 		free(renderer->depth_buffer);
 	}
-
 	if (renderer != NULL) {
 		free(renderer);
 	}
 }
+
 void c_renderer_clean(c_renderer_t *renderer)
 {
 	for (size_t i = 0; i < renderer->data_len; i++) {
@@ -54,7 +62,6 @@ c_renderer_viewport_transformation(c_renderer_ndc_vertex_t v)
 	out.x = (int)((v.x + 1.0f) * 0.5f * (WF_INTERNAL_WIDTH - 1));
 	out.y = (int)((1.0f - v.y) * 0.5f * (WF_INTERNAL_HEIGHT - 1));
 	out.z = v.z;
-
 	return out;
 }
 
@@ -62,21 +69,12 @@ vec4f_t *c_renderer_model_transform(vec4f_t *normalized, float x, float y,
 				    float z, int vertex_count)
 {
 	vec4f_t *transformed = malloc(vertex_count * sizeof(vec4f_t));
-
 	for (int i = 0; i < vertex_count; i++) {
 		transformed[i] = normalized[i];
-
 		transformed[i].x += x;
 		transformed[i].y += y;
 		transformed[i].z += z;
 	}
-
-	for (int i = 0; i < vertex_count; i++) {
-		transformed[i].x += x;
-		transformed[i].y += y;
-		transformed[i].z += z;
-	}
-
 	return transformed;
 }
 
@@ -86,12 +84,10 @@ bool c_renderer_create_projected_vertex(vec4f_t v,
 	if (v.z < 0.1f) {
 		return false;
 	}
-
 	vertex->x = v.x / v.z;
 	vertex->y = v.y / v.z;
 	vertex->z = v.z;
-
-	return vertex;
+	return true;
 }
 
 c_rasterizer_vertex_t
@@ -100,7 +96,6 @@ c_renderer_create_viewport_vertex(c_renderer_projected_vertex_t projected)
 	int screen_x = (projected.x + 1.0f) * 0.5f * WF_INTERNAL_WIDTH;
 	int screen_y = (1.0f - projected.y) * 0.5f * WF_INTERNAL_HEIGHT;
 	float screen_z = projected.z;
-
 	return (c_rasterizer_vertex_t){
 		.x = screen_x,
 		.y = screen_y,
@@ -112,6 +107,5 @@ bool c_renderer_backface_area(c_rasterizer_vertex_t a, c_rasterizer_vertex_t b,
 			      c_rasterizer_vertex_t c)
 {
 	float area = (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
-
-	return (area <= 0.0f); // it's on the back
+	return (area <= 0.0f);
 }
