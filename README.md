@@ -1,6 +1,6 @@
 # WarpFrame
 
-![first render](./docs/first_render.gif)
+![first render](./docs/demo_1.gif)
 
 **WarpFrame** is a PS1-inspired software renderer written in C.
 
