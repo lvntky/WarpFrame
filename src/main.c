@@ -15,6 +15,7 @@
 #include <wf_e_orientation.h>
 #include <wf_texture.h>
 #include <wf_control.h>
+#include <wf_tile_manager.h>
 #include <microui.h>
 #include <font8x8_basic.h>
 
@@ -363,6 +364,17 @@ int main(int argc, char *argv[])
 			c_rasterizer_draw_triangle_solid(renderer, tri[i],
 							 (wf_texture_t *)tex);
 		}
+
+#ifdef WF_DEBUG
+		wf_grid_t grid = wf_tile_create_grid(WF_INTERNAL_WIDTH,
+						     WF_INTERNAL_HEIGHT);
+		// point grid points
+		for (int i = 0; i < grid.count; i++) {
+			c_rasterizer_put_pixel(renderer, grid.tiles[i].x,
+					       grid.tiles[i].y, 0xFFFFFF);
+		}
+
+#endif
 
 		control_state.triangle_count = triangle_count;
 
