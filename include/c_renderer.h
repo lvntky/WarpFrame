@@ -6,6 +6,7 @@
 #include <wf_obj_parser.h>
 #include <stdbool.h>
 
+
 typedef struct c_renderer {
 	uint32_t *framebuffer;
 	uint32_t *color_buffer;

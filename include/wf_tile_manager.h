@@ -1,5 +1,6 @@
 #ifndef WF_TILE_MANAGER_H_
 #define WF_TILE_MANAGER_H_
+#include <c_rasterizer_type.h>
 
 #define WF_TILE_SIZE 16
 
@@ -7,6 +8,8 @@ typedef struct wf_tile {
 	int x;
 	int y;
 	int id;
+	c_rasterizer_triangle_t
+		*tri; // temporary, switch with id+global triangle list
 } wf_tile_t;
 
 typedef struct wf_grid {

@@ -357,24 +357,13 @@ int main(int argc, char *argv[])
 
 		object_to_screen(normalized_obj_vertices, faces, uvs,
 				 vertex_count, face_count, &triangle_count,
-				 control_state.rotation_angle,
+				 10.0f,
 				 control_state.camera_distance, tri);
 
 		for (int i = 0; i < triangle_count; i++) {
 			c_rasterizer_draw_triangle_solid(renderer, tri[i],
 							 (wf_texture_t *)tex);
 		}
-
-#ifdef WF_DEBUG
-		wf_grid_t grid = wf_tile_create_grid(WF_INTERNAL_WIDTH,
-						     WF_INTERNAL_HEIGHT);
-		// point grid points
-		for (int i = 0; i < grid.count; i++) {
-			c_rasterizer_put_pixel(renderer, grid.tiles[i].x,
-					       grid.tiles[i].y, 0xFFFFFF);
-		}
-
-#endif
 
 		control_state.triangle_count = triangle_count;
 

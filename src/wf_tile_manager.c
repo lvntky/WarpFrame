@@ -22,7 +22,8 @@ wf_grid_t wf_tile_create_grid(int sw, int sh)
 		for (int col = 0; col < sw; col += WF_TILE_SIZE) {
 			wf_tile_t tile = { .id = tile_counter,
 					   .x = col,
-					   .y = row };
+					   .y = row,
+					   .tri = NULL };
 			tiles[tile_counter] = tile;
 			tile_counter++;
 		}

@@ -8,13 +8,7 @@
 #include <m_util.h>
 #include <limits.h>
 #include <wf_texture.h>
-
-typedef struct bounding_box_t {
-	vec2i_t top_left;
-	vec2i_t top_right;
-	vec2i_t bottom_left;
-	vec2i_t bottom_right;
-} bounding_box_t;
+#include <wf_tile_manager.h>
 
 typedef struct barycentric {
 	float l0;
@@ -154,6 +148,29 @@ float interpolate_texture_v(c_rasterizer_triangle_t tri, barycentric_t pbar)
 	return tri.a.v * pbar.l0 + tri.b.v * pbar.l1 + tri.c.v * pbar.l2;
 }
 
+void c_tile_grid_triangle_bind(wf_grid_t *grid, bounding_box_t box,
+			       c_rasterizer_triangle_t *tri)
+{
+	// quite in-efficcient approach
+	int col_min = box.top_left.x / WF_TILE_SIZE;
+	int col_max = box.top_right.x / WF_TILE_SIZE;
+	int row_min = box.top_left.y / WF_TILE_SIZE;
+	int row_max = box.bottom_left.y / WF_TILE_SIZE;
+
+	int cols = wf_tile_col_num(WF_INTERNAL_WIDTH);
+
+	for (int row = row_min; row <= row_max; row++) {
+		for (int col = col_min; col <= col_max; col++) {
+			int index = row * cols + col;
+
+			grid->tiles[index].tri = tri;
+
+			fprintf(stdout, "tile id : %d written\n",
+				grid->tiles[index].id);
+		}
+	}
+}
+
 void c_rasterizer_draw_triangle_solid(c_renderer_t *renderer,
 				      c_rasterizer_triangle_t triangle,
 				      wf_texture_t *texture)
@@ -165,6 +182,11 @@ void c_rasterizer_draw_triangle_solid(c_renderer_t *renderer,
 	int x_end = box.top_right.x;
 	int y_start = box.top_left.y;
 	int y_end = box.bottom_left.y;
+
+	wf_grid_t grid =
+		wf_tile_create_grid(WF_INTERNAL_WIDTH, WF_INTERNAL_HEIGHT);
+
+	c_tile_grid_triangle_bind(&grid, box, &triangle);
 
 	if (x_start < 0) {
 		x_start = 0;
@@ -207,6 +229,18 @@ void c_rasterizer_draw_triangle_solid(c_renderer_t *renderer,
 							[tex_v * texture->width +
 							 tex_u];
 				}
+
+#ifdef WF_DEBUG
+				for (int i = 0; i < grid.count; i++) {
+					if (grid.tiles[i].tri != NULL) {
+						c_rasterizer_put_pixel(
+							renderer,
+							grid.tiles[i].x,
+							grid.tiles[i].y,
+							0x0000FF);
+					}
+				}
+#endif
 			}
 		}
 	}
