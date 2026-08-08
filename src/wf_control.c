@@ -17,14 +17,20 @@ void wf_control_destroy(mu_Context *ctx)
 	}
 }
 
-static void uint8_slider(mu_Context *ctx, unsigned char *value,
+static int uint8_slider(mu_Context *ctx, unsigned char *value,
 			 const char *label)
 {
+	static float tmp;
+	int res;
+	mu_push_id(ctx, &value, sizeof(value));
 	mu_layout_row(ctx, 2, (int[]){ 60, -1 }, 0);
 	mu_label(ctx, label);
-	float tmp = (float)*value;
-	mu_slider(ctx, &tmp, 0.0f, 255.0f);
+	tmp = (float)*value;
+	res = mu_slider_ex(ctx, &tmp, 0.0f, 255.0f, 0, "%.0f",
+			   MU_OPT_ALIGNCENTER);
 	*value = (unsigned char)tmp;
+	mu_pop_id(ctx);
+	return res;
 }
 
 void wf_control_create_panel(mu_Context *ctx, wf_control_state_t *state)

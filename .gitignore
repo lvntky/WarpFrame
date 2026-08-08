@@ -3,3 +3,5 @@ cmake/CPM.cmake
 warpframe
 TAGS
 assets/
+.cache/
+compile_commands.json
