@@ -164,9 +164,37 @@ void c_tile_grid_triangle_bind(wf_grid_t *grid, bounding_box_t box,
 			int index = row * cols + col;
 
 			grid->tiles[index].tri = tri;
+		}
+	}
+}
 
-			fprintf(stdout, "tile id : %d written\n",
-				grid->tiles[index].id);
+static void c_rasterizer_debug_draw_grid_mesh(c_renderer_t *renderer,
+					      wf_grid_t *grid)
+{
+	uint32_t color = 0x00FF00;
+
+	for (int i = 0; i < grid->count; i++) {
+		if (grid->tiles[i].tri != NULL) {
+			int x0 = grid->tiles[i].x;
+			int y0 = grid->tiles[i].y;
+			int x1 = x0 + WF_TILE_SIZE - 1;
+			int y1 = y0 + WF_TILE_SIZE - 1;
+
+			if (x1 >= WF_INTERNAL_WIDTH) {
+				x1 = WF_INTERNAL_WIDTH - 1;
+			}
+			if (y1 >= WF_INTERNAL_HEIGHT) {
+				y1 = WF_INTERNAL_HEIGHT - 1;
+			}
+
+			for (int x = x0; x <= x1; x++) {
+				c_rasterizer_put_pixel(renderer, x, y0, color);
+				c_rasterizer_put_pixel(renderer, x, y1, color);
+			}
+			for (int y = y0; y <= y1; y++) {
+				c_rasterizer_put_pixel(renderer, x0, y, color);
+				c_rasterizer_put_pixel(renderer, x1, y, color);
+			}
 		}
 	}
 }
@@ -220,6 +248,19 @@ void c_rasterizer_draw_triangle_solid(c_renderer_t *renderer,
 				int tex_u = texture_pu * texture->width;
 				int tex_v = texture_pv * texture->height;
 
+				if (tex_u < 0) {
+					tex_u = 0;
+				}
+				if (tex_v < 0) {
+					tex_v = 0;
+				}
+				if (tex_u >= texture->width) {
+					tex_u = texture->width - 1;
+				}
+				if (tex_v >= texture->height) {
+					tex_v = texture->height - 1;
+				}
+
 				if (p.z < renderer_depth[x]) {
 					renderer_depth[x] = p.z;
 					uint32_t depth_color =
@@ -229,21 +270,12 @@ void c_rasterizer_draw_triangle_solid(c_renderer_t *renderer,
 							[tex_v * texture->width +
 							 tex_u];
 				}
-
-#ifdef WF_DEBUG
-				for (int i = 0; i < grid.count; i++) {
-					if (grid.tiles[i].tri != NULL) {
-						c_rasterizer_put_pixel(
-							renderer,
-							grid.tiles[i].x,
-							grid.tiles[i].y,
-							0x0000FF);
-					}
-				}
-#endif
 			}
 		}
 	}
+#ifdef WF_DEBUG
+	c_rasterizer_debug_draw_grid_mesh(renderer, &grid);
+#endif
 }
 
 void c_rasterizer_draw_triangle_bounding_box_points(

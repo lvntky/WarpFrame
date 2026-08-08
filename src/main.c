@@ -357,7 +357,7 @@ int main(int argc, char *argv[])
 
 		object_to_screen(normalized_obj_vertices, faces, uvs,
 				 vertex_count, face_count, &triangle_count,
-				 10.0f,
+				 control_state.rotation_angle,
 				 control_state.camera_distance, tri);
 
 		for (int i = 0; i < triangle_count; i++) {
