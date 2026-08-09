@@ -20,7 +20,7 @@ typedef struct wf_obj_parsed {
 
 } wf_obj_parsed_t;
 
-const wf_obj_parsed_t *wf_obj_parse(char *path);
+wf_obj_parsed_t wf_obj_parse(char *path);
 void wf_obj_debug_print(const wf_obj_parsed_t *o);
 vec4f_t *wf_obj_normalize(const wf_obj_parsed_t *obj);
 

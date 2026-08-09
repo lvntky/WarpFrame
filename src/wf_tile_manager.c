@@ -32,3 +32,10 @@ wf_grid_t wf_tile_create_grid(int sw, int sh)
 	wf_grid_t grid = { .tiles = tiles, .count = tile_counter };
 	return grid;
 }
+
+void wf_tile_destroy_tile(wf_tile_t *tile)
+{
+	if (tile != NULL) {
+		free(tile);
+	}
+}

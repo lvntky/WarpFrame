@@ -33,9 +33,9 @@ static void parse_face_token(const char *token, int *vertex_index,
 
 #define WF_MAX_LINE_LEN 2048
 
-const wf_obj_parsed_t *wf_obj_parse(char *path)
+wf_obj_parsed_t wf_obj_parse(char *path)
 {
-	wf_obj_parsed_t *parsed;
+	wf_obj_parsed_t parsed;
 	FILE *fp = fopen(path, "r");
 
 	if (fp == NULL) {
@@ -62,7 +62,7 @@ const wf_obj_parsed_t *wf_obj_parse(char *path)
 		goto out;
 	}
 
-	parsed = malloc(sizeof(wf_obj_parsed_t));
+//	parsed = malloc(sizeof(wf_obj_parsed_t));
 	vec4f_t *vlist = malloc(v_count * sizeof(vec4f_t));
 	wf_face_t *flist = malloc(f_count * sizeof(wf_face_t));
 	vec2f_t *uvlist = malloc(uv_count * sizeof(vec2f_t));
@@ -103,12 +103,12 @@ const wf_obj_parsed_t *wf_obj_parse(char *path)
 		}
 	}
 
-	parsed->vertex_count = v_count;
-	parsed->vertices = vlist;
-	parsed->face_count = f_count;
-	parsed->faces = flist;
-	parsed->uv_count = uv_count;
-	parsed->uvs = uvlist;
+	parsed.vertex_count = v_count;
+	parsed.vertices = vlist;
+	parsed.face_count = f_count;
+	parsed.faces = flist;
+	parsed.uv_count = uv_count;
+	parsed.uvs = uvlist;
 out:
 	return parsed;
 }

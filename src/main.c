@@ -289,7 +289,7 @@ int main(int argc, char *argv[])
 		return 0;
 	}
 
-	const wf_obj_parsed_t *obj = wf_obj_parse(argv[1]);
+	const wf_obj_parsed_t obj = wf_obj_parse(argv[1]);
 
 	const wf_texture_t *tex = load_texture(argv[2]);
 
@@ -317,14 +317,15 @@ int main(int argc, char *argv[])
 
 	int triangle_count = 0;
 
-	vec4f_t *normalized_obj_vertices = wf_obj_normalize(obj);
+	vec4f_t *normalized_obj_vertices = wf_obj_normalize(&obj);
 
-	int vertex_count = obj->vertex_count;
-	int face_count = obj->face_count;
+	int vertex_count = obj.vertex_count;
+	int face_count = obj.face_count;
 
-	wf_face_t *faces = obj->faces;
-	vec2f_t *uvs = obj->uvs;
+	wf_face_t *faces = obj.faces;
+	vec2f_t *uvs = obj.uvs;
 
+	
 	c_rasterizer_triangle_t *tri =
 		malloc(face_count * sizeof(c_rasterizer_triangle_t));
 
@@ -389,7 +390,12 @@ int main(int argc, char *argv[])
 				control_state.rotation_speed;
 	}
 
+	free(obj.vertices);
+	free(obj.faces);
+	free(obj.uvs);
+	free(normalized_obj_vertices);
 	free(tri);
+	
 	wf_font_destroy();
 	wf_control_destroy(ctx);
 	wf_platform_shutdown(platform);

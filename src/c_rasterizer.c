@@ -10,6 +10,10 @@
 #include <wf_texture.h>
 #include <wf_tile_manager.h>
 
+/** Locals */
+static wf_grid_t c_rasterizer_grid;
+static wf_grid_t *c_rasterizer_grid_ptr;
+
 typedef struct barycentric {
 	float l0;
 	float l1;
@@ -162,7 +166,6 @@ void c_tile_grid_triangle_bind(wf_grid_t *grid, bounding_box_t box,
 	for (int row = row_min; row <= row_max; row++) {
 		for (int col = col_min; col <= col_max; col++) {
 			int index = row * cols + col;
-
 			grid->tiles[index].tri = tri;
 		}
 	}
@@ -199,6 +202,71 @@ static void c_rasterizer_debug_draw_grid_mesh(c_renderer_t *renderer,
 	}
 }
 
+static void c_rasterizer_draw_tile(c_renderer_t *renderer, wf_tile_t *tile,
+				   c_rasterizer_triangle_t *triangle,
+				   wf_texture_t *texture)
+{
+	int x_start = tile->x;
+	int y_start = tile->y;
+
+	int x_end = x_start + WF_TILE_SIZE;
+	int y_end = y_start + WF_TILE_SIZE;
+
+	if (x_end > WF_INTERNAL_WIDTH)
+		x_end = WF_INTERNAL_WIDTH;
+
+	if (y_end > WF_INTERNAL_HEIGHT)
+		y_end = WF_INTERNAL_HEIGHT;
+
+	for (int y = y_start; y < y_end; y++) {
+		uint32_t *row = &renderer->color_buffer[y * WF_INTERNAL_WIDTH];
+
+		float *renderer_depth =
+			&renderer->depth_buffer[y * WF_INTERNAL_WIDTH];
+
+		for (int x = x_start; x < x_end; x++) {
+			c_rasterizer_vertex_t p = { x, y, 0.0f };
+
+			if (!is_point_inside_triange(*triangle, p))
+				continue;
+
+			barycentric_t pbar =
+				barycentric_coordinate(*triangle, p);
+
+			p.z = calculate_pixel_depth(*triangle, pbar);
+
+			float texture_pu =
+				interpolate_texture_u(*triangle, pbar);
+
+			float texture_pv =
+				interpolate_texture_v(*triangle, pbar);
+
+			int tex_u = texture_pu * texture->width;
+
+			int tex_v = texture_pv * texture->height;
+
+			if (tex_u < 0)
+				tex_u = 0;
+
+			if (tex_v < 0)
+				tex_v = 0;
+
+			if (tex_u >= texture->width)
+				tex_u = texture->width - 1;
+
+			if (tex_v >= texture->height)
+				tex_v = texture->height - 1;
+
+			if (p.z < renderer_depth[x]) {
+				renderer_depth[x] = p.z;
+
+				row[x] = texture->data[tex_v * texture->width +
+						       tex_u];
+			}
+		}
+	}
+}
+
 void c_rasterizer_draw_triangle_solid(c_renderer_t *renderer,
 				      c_rasterizer_triangle_t triangle,
 				      wf_texture_t *texture)
@@ -206,76 +274,34 @@ void c_rasterizer_draw_triangle_solid(c_renderer_t *renderer,
 	bounding_box_t box =
 		c_rasterizer_triange_calculate_bounding_box(triangle);
 
-	int x_start = box.top_left.x;
-	int x_end = box.top_right.x;
-	int y_start = box.top_left.y;
-	int y_end = box.bottom_left.y;
-
-	wf_grid_t grid =
+	c_rasterizer_grid =
 		wf_tile_create_grid(WF_INTERNAL_WIDTH, WF_INTERNAL_HEIGHT);
+	c_rasterizer_grid_ptr = &c_rasterizer_grid;
 
-	c_tile_grid_triangle_bind(&grid, box, &triangle);
+	c_tile_grid_triangle_bind(c_rasterizer_grid_ptr, box, &triangle);
 
-	if (x_start < 0) {
-		x_start = 0;
-	}
-	if (y_start < 0) {
-		y_start = 0;
-	}
-	if (x_end >= WF_INTERNAL_WIDTH) {
-		x_end = WF_INTERNAL_WIDTH - 1;
-	}
-	if (y_end >= WF_INTERNAL_HEIGHT) {
-		y_end = WF_INTERNAL_HEIGHT - 1;
-	}
+	int cols = wf_tile_col_num(WF_INTERNAL_WIDTH);
 
-	for (int y = y_start; y <= y_end; y++) {
-		uint32_t *row = &renderer->color_buffer[y * WF_INTERNAL_WIDTH];
-		float *renderer_depth =
-			&renderer->depth_buffer[y * WF_INTERNAL_WIDTH];
+	int rows = wf_tile_row_num(WF_INTERNAL_HEIGHT);
 
-		for (int x = x_start; x <= x_end; x++) {
-			c_rasterizer_vertex_t p = { x, y, 0.0f };
-			if (is_point_inside_triange(triangle, p)) {
-				barycentric_t pbar =
-					barycentric_coordinate(triangle, p);
-				p.z = calculate_pixel_depth(triangle, pbar);
-				float texture_pu =
-					interpolate_texture_u(triangle, pbar);
-				float texture_pv =
-					interpolate_texture_v(triangle, pbar);
+	for (int row = 0; row < rows; row++) {
+		for (int col = 0; col < cols; col++) {
+			int index = row * cols + col;
 
-				int tex_u = texture_pu * texture->width;
-				int tex_v = texture_pv * texture->height;
+			wf_tile_t *tile = &c_rasterizer_grid_ptr->tiles[index];
 
-				if (tex_u < 0) {
-					tex_u = 0;
-				}
-				if (tex_v < 0) {
-					tex_v = 0;
-				}
-				if (tex_u >= texture->width) {
-					tex_u = texture->width - 1;
-				}
-				if (tex_v >= texture->height) {
-					tex_v = texture->height - 1;
-				}
+			if (tile->tri == NULL)
+				continue;
 
-				if (p.z < renderer_depth[x]) {
-					renderer_depth[x] = p.z;
-					uint32_t depth_color =
-						color_from_depth(p.z);
-					row[x] =
-						texture->data
-							[tex_v * texture->width +
-							 tex_u];
-				}
-			}
+			c_rasterizer_draw_tile(renderer, tile, tile->tri,
+					       texture);
 		}
 	}
+
 #ifdef WF_DEBUG
-	c_rasterizer_debug_draw_grid_mesh(renderer, &grid);
+	c_rasterizer_debug_draw_grid_mesh(renderer, c_rasterizer_grid_ptr);
 #endif
+	wf_tile_destroy_tile(c_rasterizer_grid_ptr->tiles);
 }
 
 void c_rasterizer_draw_triangle_bounding_box_points(

@@ -18,6 +18,6 @@ bounding_box_t
 c_rasterizer_triange_calculate_bounding_box(c_rasterizer_triangle_t triangle);
 
 void c_rasterizer_draw_triangle_bounding_box_points(
-	c_renderer_t *renderer, c_rasterizer_triangle_t triangle);
+													c_renderer_t *renderer, c_rasterizer_triangle_t triangle);
 
 #endif //C_RASTERIZER_H_
