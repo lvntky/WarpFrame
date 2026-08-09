@@ -1,5 +1,6 @@
 #include <wf_tile_manager.h>
 #include <stdlib.h>
+#include <stdint.h>
 
 int wf_tile_col_num(int width)
 {
@@ -15,7 +16,11 @@ wf_grid_t wf_tile_create_grid(int sw, int sh)
 	int col_num = wf_tile_col_num(sw);
 	int row_num = wf_tile_row_num(sh);
 
-	wf_tile_t *tiles = malloc(col_num * row_num * sizeof(wf_tile_t));
+	// for now assuming each tile can or should store one triangle
+	// so allocating one triangle size will prevent buffer overflow i assume
+	size_t triangle_size = sizeof(c_rasterizer_triangle_t);
+	
+	wf_tile_t *tiles = malloc(col_num * row_num * triangle_size * sizeof(wf_tile_t));
 	int tile_counter = 0;
 
 	for (int row = 0; row < sh; row += WF_TILE_SIZE) {

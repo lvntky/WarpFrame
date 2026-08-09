@@ -152,23 +152,71 @@ float interpolate_texture_v(c_rasterizer_triangle_t tri, barycentric_t pbar)
 	return tri.a.v * pbar.l0 + tri.b.v * pbar.l1 + tri.c.v * pbar.l2;
 }
 
-void c_tile_grid_triangle_bind(wf_grid_t *grid, bounding_box_t box,
-			       c_rasterizer_triangle_t *tri)
+void c_tile_grid_triangle_bind(wf_grid_t *grid,
+                               bounding_box_t box,
+                               c_rasterizer_triangle_t *tri)
 {
-	// quite in-efficcient approach
-	int col_min = box.top_left.x / WF_TILE_SIZE;
-	int col_max = box.top_right.x / WF_TILE_SIZE;
-	int row_min = box.top_left.y / WF_TILE_SIZE;
-	int row_max = box.bottom_left.y / WF_TILE_SIZE;
+    int cols = wf_tile_col_num(WF_INTERNAL_WIDTH);
+    int rows = wf_tile_row_num(WF_INTERNAL_HEIGHT);
 
-	int cols = wf_tile_col_num(WF_INTERNAL_WIDTH);
+    /*
+     * Clamp bounding box to screen.
+     */
+    int x_min = box.top_left.x;
 
-	for (int row = row_min; row <= row_max; row++) {
-		for (int col = col_min; col <= col_max; col++) {
-			int index = row * cols + col;
-			grid->tiles[index].tri = tri;
-		}
-	}
+    if (x_min < 0)
+        x_min = 0;
+
+    int x_max = box.top_right.x;
+
+    if (x_max >= WF_INTERNAL_WIDTH)
+        x_max = WF_INTERNAL_WIDTH - 1;
+
+    int y_min = box.top_left.y;
+
+    if (y_min < 0)
+        y_min = 0;
+
+    int y_max = box.bottom_left.y;
+
+    if (y_max >= WF_INTERNAL_HEIGHT)
+        y_max = WF_INTERNAL_HEIGHT - 1;
+
+    /*
+     * Completely outside screen.
+     */
+    if (x_min > x_max || y_min > y_max)
+        return;
+
+    int col_min = x_min / WF_TILE_SIZE;
+    int col_max = x_max / WF_TILE_SIZE;
+
+    int row_min = y_min / WF_TILE_SIZE;
+    int row_max = y_max / WF_TILE_SIZE;
+
+    /*
+     * Extra safety.
+     */
+    if (col_min < 0)
+        col_min = 0;
+
+    if (col_max >= cols)
+        col_max = cols - 1;
+
+    if (row_min < 0)
+        row_min = 0;
+
+    if (row_max >= rows)
+        row_max = rows - 1;
+
+    for (int row = row_min; row <= row_max; row++) {
+        for (int col = col_min; col <= col_max; col++) {
+
+            int index = row * cols + col;
+
+            grid->tiles[index].tri = tri;
+        }
+    }
 }
 
 static void c_rasterizer_debug_draw_grid_mesh(c_renderer_t *renderer,

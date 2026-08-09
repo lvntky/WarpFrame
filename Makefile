@@ -59,7 +59,7 @@ run: all
 run-asan: asan
 	ASAN_OPTIONS=abort_on_error=1:detect_stack_use_after_return=1 \
 	UBSAN_OPTIONS=print_stacktrace=1 \
-	./$(TARGET) ./assets/triangle.obj
+	./$(TARGET) ./assets/cube.obj
 
 clean:
 	rm -rf $(BUILD_DIR) $(TARGET)
