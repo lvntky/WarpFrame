@@ -389,7 +389,11 @@ int main(int argc, char *argv[])
 			control_state.rotation_angle +=
 				control_state.rotation_speed;
 	}
-
+#ifdef WF_DEBUG
+	wf_texture_destroy_checkerboard(tex);
+#endif
+	c_renderer_destroy(renderer);
+	
 	free(obj.vertices);
 	free(obj.faces);
 	free(obj.uvs);

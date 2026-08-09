@@ -38,6 +38,14 @@ wf_texture_t *wf_texture_create_checkerboard(void)
 	return texture;
 }
 
+void wf_texture_destroy_checkerboard(wf_texture_t *tex)
+{
+	if (tex != NULL) {
+		free(tex->data);
+		free(tex);
+	}	
+}
+
 #endif
 wf_texture_t *load_texture(const char *path)
 {

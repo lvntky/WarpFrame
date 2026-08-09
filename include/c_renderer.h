@@ -27,6 +27,8 @@ typedef struct c_renderer_projected_vertex {
 } c_renderer_projected_vertex_t;
 
 int c_renderer_init(c_renderer_t **renderer);
+void c_renderer_destroy(c_renderer_t *renderer);
+
 void c_renderer_shutdown(c_renderer_t *renderer);
 void c_renderer_clean(c_renderer_t *renderer);
 c_rasterizer_vertex_t

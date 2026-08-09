@@ -31,6 +31,16 @@ int c_renderer_init(c_renderer_t **renderer)
 	return 0;
 }
 
+void c_renderer_destroy(c_renderer_t *renderer)
+{
+	if (renderer != NULL) {
+		free(renderer->framebuffer);
+		free(renderer->color_buffer);
+		free(renderer->depth_buffer);
+		free(renderer);
+	}
+}
+
 void c_renderer_shutdown(c_renderer_t *renderer)
 {
 	if (renderer->framebuffer != NULL) {

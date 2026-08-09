@@ -11,8 +11,9 @@ typedef struct wf_texture {
 
 #ifdef WF_DEBUG
 wf_texture_t *wf_texture_create_checkerboard(void);
+void wf_texture_destroy_checkerboard(wf_texture_t *tex);
 #endif
 
-wf_texture_t *load_texture(const char* path);
+wf_texture_t *load_texture(const char *path);
 
 #endif //WF_TEXTURE_H_
