@@ -2,7 +2,7 @@
 #define WF_TILE_MANAGER_H_
 #include <c_rasterizer_type.h>
 
-#define WF_TILE_SIZE 8
+#define WF_TILE_SIZE 16
 
 typedef struct wf_tile {
 	int x;
