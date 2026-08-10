@@ -325,7 +325,6 @@ int main(int argc, char *argv[])
 	wf_face_t *faces = obj.faces;
 	vec2f_t *uvs = obj.uvs;
 
-	
 	c_rasterizer_triangle_t *tri =
 		malloc(face_count * sizeof(c_rasterizer_triangle_t));
 
@@ -393,16 +392,22 @@ int main(int argc, char *argv[])
 	wf_texture_destroy_checkerboard(tex);
 #endif
 	c_renderer_destroy(renderer);
-	
+
 	free(obj.vertices);
 	free(obj.faces);
 	free(obj.uvs);
 	free(normalized_obj_vertices);
 	free(tri);
-	
+
 	wf_font_destroy();
 	wf_control_destroy(ctx);
 	wf_platform_shutdown(platform);
 
 	return 0;
+}
+
+vec2i_t m_vec2i_edge(vec2i_t a, vec2i_t b)
+{
+	vec2i_t ret = { .x = (b.x - a.x), .y = (b.y - a.y) };
+	return ret;
 }

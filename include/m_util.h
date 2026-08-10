@@ -16,5 +16,11 @@ mat4f_t m_mat4f_rotate(float angle, ERotationOrientation orientation);
 mat4f_t m_mat4f_transform(vec4f_t transformation);
 
 vec4f_t m_vec4f_mul(vec4f_t a, vec4f_t b);
+
+// functions used in collusion detection
+
+vec2i_t m_vec2i_edge(vec2i_t a, vec2i_t b);
+int m_vec2i_dot(vec2i_t a, vec2i_t b);
+
 #endif //M_UTIL_H_
 

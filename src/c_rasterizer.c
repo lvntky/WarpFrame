@@ -152,71 +152,147 @@ float interpolate_texture_v(c_rasterizer_triangle_t tri, barycentric_t pbar)
 	return tri.a.v * pbar.l0 + tri.b.v * pbar.l1 + tri.c.v * pbar.l2;
 }
 
-void c_tile_grid_triangle_bind(wf_grid_t *grid,
-                               bounding_box_t box,
-                               c_rasterizer_triangle_t *tri)
+void project_polygon(vec2i_t *vertices, size_t count, vec2i_t axis, int *min,
+		     int *max)
 {
-    int cols = wf_tile_col_num(WF_INTERNAL_WIDTH);
-    int rows = wf_tile_row_num(WF_INTERNAL_HEIGHT);
+	*min = INT_MAX;
+	*max = INT_MIN;
 
-    /*
+	for (size_t i = 0; i < count; ++i) {
+		int projection = m_vec2i_dot(vertices[i], axis);
+
+		if (projection < *min)
+			*min = projection;
+
+		if (projection > *max)
+			*max = projection;
+	}
+}
+
+static bool sat_collision_2d(wf_tile_t *tile, c_rasterizer_triangle_t *triangle)
+{
+	vec2i_t axes[5];
+
+	/* Tile axes */
+	axes[0] = (vec2i_t){ .x = 1, .y = 0 };
+
+	axes[1] = (vec2i_t){ .x = 0, .y = 1 };
+
+	/* Triangle edges */
+	vec2i_t edge_a = m_vec2i_edge(
+		(vec2i_t){ .x = triangle->a.x, .y = triangle->a.y },
+		(vec2i_t){ .x = triangle->b.x, .y = triangle->b.y });
+
+	vec2i_t edge_b = m_vec2i_edge(
+		(vec2i_t){ .x = triangle->b.x, .y = triangle->b.y },
+		(vec2i_t){ .x = triangle->c.x, .y = triangle->c.y });
+
+	vec2i_t edge_c = m_vec2i_edge(
+		(vec2i_t){ .x = triangle->c.x, .y = triangle->c.y },
+		(vec2i_t){ .x = triangle->a.x, .y = triangle->a.y });
+
+	/* Triangle axes */
+	axes[2] = (vec2i_t){ .x = -edge_a.y, .y = edge_a.x };
+
+	axes[3] = (vec2i_t){ .x = -edge_b.y, .y = edge_b.x };
+
+	axes[4] = (vec2i_t){ .x = -edge_c.y, .y = edge_c.x };
+
+	vec2i_t tile_vertices[4] = {
+		{ .x = tile->x, .y = tile->y },
+		{ .x = tile->x + WF_TILE_SIZE, .y = tile->y },
+		{ .x = tile->x + WF_TILE_SIZE, .y = tile->y + WF_TILE_SIZE },
+		{ .x = tile->x, .y = tile->y + WF_TILE_SIZE }
+	};
+	vec2i_t triangle_vertices[3] = {
+		{ .x = triangle->a.x, .y = triangle->a.y },
+		{ .x = triangle->b.x, .y = triangle->b.y },
+		{ .x = triangle->c.x, .y = triangle->c.y }
+	};
+
+	for (size_t i = 0; i < 5; ++i) {
+		int tile_min, tile_max;
+		int triangle_min, triangle_max;
+
+		project_polygon(tile_vertices, 4, axes[i], &tile_min,
+				&tile_max);
+
+		project_polygon(triangle_vertices, 3, axes[i], &triangle_min,
+				&triangle_max);
+
+		/* Separating axis found */
+		if (tile_max < triangle_min || triangle_max < tile_min) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
+void c_tile_grid_triangle_bind(wf_grid_t *grid, bounding_box_t box,
+			       c_rasterizer_triangle_t *tri)
+{
+	int cols = wf_tile_col_num(WF_INTERNAL_WIDTH);
+	int rows = wf_tile_row_num(WF_INTERNAL_HEIGHT);
+
+	/*
      * Clamp bounding box to screen.
      */
-    int x_min = box.top_left.x;
+	int x_min = box.top_left.x;
 
-    if (x_min < 0)
-        x_min = 0;
+	if (x_min < 0)
+		x_min = 0;
 
-    int x_max = box.top_right.x;
+	int x_max = box.top_right.x;
 
-    if (x_max >= WF_INTERNAL_WIDTH)
-        x_max = WF_INTERNAL_WIDTH - 1;
+	if (x_max >= WF_INTERNAL_WIDTH)
+		x_max = WF_INTERNAL_WIDTH - 1;
 
-    int y_min = box.top_left.y;
+	int y_min = box.top_left.y;
 
-    if (y_min < 0)
-        y_min = 0;
+	if (y_min < 0)
+		y_min = 0;
 
-    int y_max = box.bottom_left.y;
+	int y_max = box.bottom_left.y;
 
-    if (y_max >= WF_INTERNAL_HEIGHT)
-        y_max = WF_INTERNAL_HEIGHT - 1;
+	if (y_max >= WF_INTERNAL_HEIGHT)
+		y_max = WF_INTERNAL_HEIGHT - 1;
 
-    /*
+	/*
      * Completely outside screen.
      */
-    if (x_min > x_max || y_min > y_max)
-        return;
+	if (x_min > x_max || y_min > y_max)
+		return;
 
-    int col_min = x_min / WF_TILE_SIZE;
-    int col_max = x_max / WF_TILE_SIZE;
+	int col_min = x_min / WF_TILE_SIZE;
+	int col_max = x_max / WF_TILE_SIZE;
 
-    int row_min = y_min / WF_TILE_SIZE;
-    int row_max = y_max / WF_TILE_SIZE;
+	int row_min = y_min / WF_TILE_SIZE;
+	int row_max = y_max / WF_TILE_SIZE;
 
-    /*
+	/*
      * Extra safety.
      */
-    if (col_min < 0)
-        col_min = 0;
+	if (col_min < 0)
+		col_min = 0;
 
-    if (col_max >= cols)
-        col_max = cols - 1;
+	if (col_max >= cols)
+		col_max = cols - 1;
 
-    if (row_min < 0)
-        row_min = 0;
+	if (row_min < 0)
+		row_min = 0;
 
-    if (row_max >= rows)
-        row_max = rows - 1;
+	if (row_max >= rows)
+		row_max = rows - 1;
 
-    for (int row = row_min; row <= row_max; row++) {
-        for (int col = col_min; col <= col_max; col++) {
-
-            int index = row * cols + col;
-
-            grid->tiles[index].tri = tri;
-        }
-    }
+	for (int row = row_min; row <= row_max; row++) {
+		for (int col = col_min; col <= col_max; col++) {
+			int index = row * cols + col;
+			if (sat_collision_2d(&grid->tiles[index], tri)) {
+				grid->tiles[index].tri = tri;
+			}
+		}
+	}
 }
 
 static void c_rasterizer_debug_draw_grid_mesh(c_renderer_t *renderer,

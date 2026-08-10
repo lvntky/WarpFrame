@@ -113,7 +113,7 @@ mat4f_t m_mat4f_transform(vec4f_t transformation)
 	return out;
 }
 
-vec4f_t m_vec4f_mul(vec4f_t a, vec4f_t b)
+int m_vec2i_dot(vec2i_t a, vec2i_t b)
 {
-	return (vec4f_t){ a.x * b.x, a.y * b.y, a.z * b.z, a.w * b.w };
+	return (a.x * b.x) + (a.y * b.y);
 }

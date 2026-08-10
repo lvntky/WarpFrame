@@ -50,4 +50,11 @@ typedef struct mat4f {
 	float m[4][4];
 } mat4f_t;
 
+// Types used in collusion detection
+
+typedef struct projection {
+	int min;
+	int max;
+} projection_t;
+
 #endif //M_TYPE_H_
