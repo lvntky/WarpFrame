@@ -110,8 +110,8 @@ static void wf_draw_keybind_overlay(SDL_Renderer *ren, int x, int y)
 {
 	static const char *lines[] = {
 		"Arrows  rotate yaw/pitch",
-		"Z / X   rot speed -/+",
-		"A / S   distance -/+",
+		"A / S   rot speed -/+",
+		"Z / X   distance -/+",
 		"Space   pause",
 		"Esc     quit",
 	};
@@ -189,16 +189,16 @@ static void poll_all_input(wf_input_t *input, mu_Context *ctx,
 			if (event.key.keysym.sym == SDLK_SPACE) {
 				state->paused = !state->paused;
 			}
-			if (event.key.keysym.sym == SDLK_z) {
+			if (event.key.keysym.sym == SDLK_a) {
 				state->rotation_speed -= 0.01f;
 			}
-			if (event.key.keysym.sym == SDLK_x) {
+			if (event.key.keysym.sym == SDLK_s) {
 				state->rotation_speed += 0.01f;
 			}
-			if (event.key.keysym.sym == SDLK_a) {
+			if (event.key.keysym.sym == SDLK_z) {
 				state->camera_distance -= 0.1f;
 			}
-			if (event.key.keysym.sym == SDLK_s) {
+			if (event.key.keysym.sym == SDLK_x) {
 				state->camera_distance += 0.1f;
 			}
 			break;
@@ -320,8 +320,13 @@ void object_to_screen(vec4f_t *normalized_obj_vertices, wf_face_t *faces,
 int main(int argc, char *argv[])
 {
 	if (argc < 2) {
-		fprintf(stdout, "%s running without loaded object", argv[0]);
+		fprintf(stdout, "%s cannot run without loaded object", argv[0]);
 		return 0;
+	} else if (argc < 3) {
+#ifndef WF_DEBUG
+		fprintf(stdout, "%s cannot run without texture", argv[0]);
+		return 0;
+#endif
 	}
 
 	const wf_obj_parsed_t obj = wf_obj_parse(argv[1]);
