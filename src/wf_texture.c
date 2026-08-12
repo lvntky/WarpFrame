@@ -49,6 +49,7 @@ void wf_texture_destroy_checkerboard(wf_texture_t *tex)
 #endif
 wf_texture_t *load_texture(const char *path)
 {
+	stbi_set_flip_vertically_on_load(1);
 	int width, height, channels;
 	unsigned char *data = stbi_load(path, &width, &height, &channels, 4);
 	if (!data)
