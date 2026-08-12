@@ -10,7 +10,7 @@ int m_det2i(vec2i_t a, vec2i_t b)
 
 mat4i_t *m_mat4i_create()
 {
-	mat4i_t *mat = calloc(4, sizeof(mat4i_t));
+	mat4i_t *mat = calloc(1, sizeof(mat4i_t));
 	if (!mat) {
 		fprintf(stderr, "unable to create 4x4 matrix mat4i_t.");
 	}
@@ -22,7 +22,6 @@ void m_mat4i_destroy(mat4i_t *mat)
 	if (!mat) {
 		return;
 	}
-
 	free(mat);
 }
 
@@ -32,39 +31,33 @@ mat4f_t m_mat4f_identity()
 			       { 0.0f, 1.0f, 0.0f, 0.0f },
 			       { 0.0f, 0.0f, 1.0f, 0.0f },
 			       { 0.0f, 0.0f, 0.0f, 1.0f } } };
-
 	return out;
 }
 
 vec4f_t m_mat4f_mul_vec4f(mat4f_t mat, vec4f_t vec)
 {
 	vec4f_t out;
-
 	out.x = mat.m[0][0] * vec.x + mat.m[0][1] * vec.y +
 		mat.m[0][2] * vec.z + mat.m[0][3] * vec.w;
-
 	out.y = mat.m[1][0] * vec.x + mat.m[1][1] * vec.y +
 		mat.m[1][2] * vec.z + mat.m[1][3] * vec.w;
-
 	out.z = mat.m[2][0] * vec.x + mat.m[2][1] * vec.y +
 		mat.m[2][2] * vec.z + mat.m[2][3] * vec.w;
-
 	out.w = mat.m[3][0] * vec.x + mat.m[3][1] * vec.y +
 		mat.m[3][2] * vec.z + mat.m[3][3] * vec.w;
-
 	return out;
 }
 
 mat4f_t m_mat4f_mul(mat4f_t a, mat4f_t b)
 {
 	mat4f_t c;
-
 	for (int i = 0; i < 4; i++) {
 		for (int j = 0; j < 4; j++) {
-			c.m[i][j] = a.m[i][j] * b.m[i][j];
+			c.m[i][j] =
+				a.m[i][0] * b.m[0][j] + a.m[i][1] * b.m[1][j] +
+				a.m[i][2] * b.m[2][j] + a.m[i][3] * b.m[3][j];
 		}
 	}
-
 	return c;
 }
 
@@ -72,9 +65,7 @@ mat4f_t m_mat4f_rotate(float angle, ERotationOrientation orientation)
 {
 	float c = cosf(angle);
 	float s = sinf(angle);
-
 	mat4f_t r = m_mat4f_identity();
-
 	switch (orientation) {
 	case ROTATE_X: {
 		r.m[1][1] = c;
@@ -90,7 +81,6 @@ mat4f_t m_mat4f_rotate(float angle, ERotationOrientation orientation)
 		r.m[1][1] = c;
 		break;
 	}
-		// Rotate by y
 	default:
 		r.m[0][0] = c;
 		r.m[0][2] = s;
@@ -98,18 +88,15 @@ mat4f_t m_mat4f_rotate(float angle, ERotationOrientation orientation)
 		r.m[2][2] = c;
 		break;
 	}
-
 	return r;
 }
 
 mat4f_t m_mat4f_transform(vec4f_t transformation)
 {
 	mat4f_t out = m_mat4f_identity();
-
 	out.m[0][3] = transformation.x;
 	out.m[1][3] = transformation.y;
 	out.m[2][3] = transformation.z;
-
 	return out;
 }
 

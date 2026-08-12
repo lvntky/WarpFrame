@@ -19,6 +19,9 @@
 #include <microui.h>
 #include <font8x8_basic.h>
 
+#define WF_MANUAL_ROT_SPEED 0.003f
+#define WF_PITCH_LIMIT 1.5533f
+
 typedef struct {
 	SDL_Texture *glyphs[128];
 } wf_font_t;
@@ -106,6 +109,7 @@ static uint32_t random_color(void)
 static void wf_draw_keybind_overlay(SDL_Renderer *ren, int x, int y)
 {
 	static const char *lines[] = {
+		"Arrows  rotate yaw/pitch",
 		"Z / X   rot speed -/+",
 		"A / S   distance -/+",
 		"Space   pause",
@@ -115,7 +119,7 @@ static void wf_draw_keybind_overlay(SDL_Renderer *ren, int x, int y)
 
 	SDL_RenderSetClipRect(ren, NULL);
 
-	for (int i = 0; i < 4; i++)
+	for (int i = 0; i < 5; i++)
 		wf_font_draw_text(ren, lines[i], x, y + i * 12, color);
 }
 
@@ -222,13 +226,10 @@ static void poll_all_input(wf_input_t *input, mu_Context *ctx,
 
 	const uint8_t *keyboard = SDL_GetKeyboardState(NULL);
 
-	input->key_up = keyboard[SDL_SCANCODE_W] || keyboard[SDL_SCANCODE_UP];
-	input->key_down = keyboard[SDL_SCANCODE_S] ||
-			  keyboard[SDL_SCANCODE_DOWN];
-	input->key_left = keyboard[SDL_SCANCODE_A] ||
-			  keyboard[SDL_SCANCODE_LEFT];
-	input->key_right = keyboard[SDL_SCANCODE_D] ||
-			   keyboard[SDL_SCANCODE_RIGHT];
+	input->key_up = keyboard[SDL_SCANCODE_UP];
+	input->key_down = keyboard[SDL_SCANCODE_DOWN];
+	input->key_left = keyboard[SDL_SCANCODE_LEFT];
+	input->key_right = keyboard[SDL_SCANCODE_RIGHT];
 }
 
 static void wf_control_fill_background(c_renderer_t *renderer,
@@ -242,14 +243,16 @@ static void wf_control_fill_background(c_renderer_t *renderer,
 
 void object_to_screen(vec4f_t *normalized_obj_vertices, wf_face_t *faces,
 		      vec2f_t *uvs, int vertex_count, int face_count,
-		      int *out_count, float angle, float distance,
+		      int *out_count, float yaw, float pitch, float distance,
 		      c_rasterizer_triangle_t *triangle_list)
 {
 	vec4f_t view_vertex_list[vertex_count];
 	c_renderer_projected_vertex_t projected_vertex_list[vertex_count];
 	c_rasterizer_vertex_t screen_vertex_list[vertex_count];
 
-	mat4f_t model_rotation = m_mat4f_rotate(angle, ROTATE_Y);
+	mat4f_t rot_y = m_mat4f_rotate(yaw, ROTATE_Y);
+	mat4f_t rot_x = m_mat4f_rotate(pitch, ROTATE_X);
+	mat4f_t model_rotation = m_mat4f_mul(rot_y, rot_x);
 
 	mat4f_t model_translation =
 		m_mat4f_transform((vec4f_t){ 0.0f, 0.00f, distance, 1.0f });
@@ -367,12 +370,14 @@ int main(int argc, char *argv[])
 	wf_control_state_t control_state;
 	wf_control_reset_state(&control_state);
 
+	float pitch_angle = 0.0f;
+
 	Uint32 last_ticks = SDL_GetTicks();
 	Uint32 frame_accum = 0;
 	int frame_count = 0;
 
 	wf_draw_keybind_overlay(sdl_renderer, 20, 500);
-	
+
 	while (!input.quit) {
 		Uint32 now = SDL_GetTicks();
 		Uint32 delta = now - last_ticks;
@@ -391,7 +396,7 @@ int main(int argc, char *argv[])
 
 		object_to_screen(normalized_obj_vertices, faces, uvs,
 				 vertex_count, face_count, &triangle_count,
-				 control_state.rotation_angle,
+				 control_state.rotation_angle, pitch_angle,
 				 control_state.camera_distance, tri);
 
 		for (int i = 0; i < triangle_count; i++) {
@@ -417,6 +422,22 @@ int main(int argc, char *argv[])
 		wf_platform_end_ui(platform);
 
 		SDL_RenderPresent(sdl_renderer);
+
+		float step = WF_MANUAL_ROT_SPEED * (float)delta;
+
+		if (input.key_left)
+			control_state.rotation_angle -= step;
+		if (input.key_right)
+			control_state.rotation_angle += step;
+		if (input.key_up)
+			pitch_angle -= step;
+		if (input.key_down)
+			pitch_angle += step;
+
+		if (pitch_angle > WF_PITCH_LIMIT)
+			pitch_angle = WF_PITCH_LIMIT;
+		if (pitch_angle < -WF_PITCH_LIMIT)
+			pitch_angle = -WF_PITCH_LIMIT;
 
 		if (!control_state.paused)
 			control_state.rotation_angle +=
