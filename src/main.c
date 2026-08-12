@@ -103,6 +103,22 @@ static uint32_t random_color(void)
 	return ((uint32_t)r << 16) | ((uint32_t)g << 8) | ((uint32_t)b);
 }
 
+static void wf_draw_keybind_overlay(SDL_Renderer *ren, int x, int y)
+{
+	static const char *lines[] = {
+		"Z / X   rot speed -/+",
+		"A / S   distance -/+",
+		"Space   pause",
+		"Esc     quit",
+	};
+	mu_Color color = { 200, 200, 200, 255 };
+
+	SDL_RenderSetClipRect(ren, NULL);
+
+	for (int i = 0; i < 4; i++)
+		wf_font_draw_text(ren, lines[i], x, y + i * 12, color);
+}
+
 static void mu_render_commands(SDL_Renderer *ren, mu_Context *ctx)
 {
 	mu_Command *cmd = NULL;
@@ -145,7 +161,8 @@ static int mu_map_mouse_button(uint8_t sdl_button)
 	}
 }
 
-static void poll_all_input(wf_input_t *input, mu_Context *ctx)
+static void poll_all_input(wf_input_t *input, mu_Context *ctx,
+			   wf_control_state_t *state)
 {
 	input->key_up = false;
 	input->key_down = false;
@@ -164,6 +181,21 @@ static void poll_all_input(wf_input_t *input, mu_Context *ctx)
 			if (event.key.keysym.sym == SDLK_ESCAPE) {
 				input->quit = true;
 				input->key_escape = true;
+			}
+			if (event.key.keysym.sym == SDLK_SPACE) {
+				state->paused = !state->paused;
+			}
+			if (event.key.keysym.sym == SDLK_z) {
+				state->rotation_speed -= 0.01f;
+			}
+			if (event.key.keysym.sym == SDLK_x) {
+				state->rotation_speed += 0.01f;
+			}
+			if (event.key.keysym.sym == SDLK_a) {
+				state->camera_distance -= 0.1f;
+			}
+			if (event.key.keysym.sym == SDLK_s) {
+				state->camera_distance += 0.1f;
 			}
 			break;
 		case SDL_MOUSEMOTION:
@@ -339,6 +371,8 @@ int main(int argc, char *argv[])
 	Uint32 frame_accum = 0;
 	int frame_count = 0;
 
+	wf_draw_keybind_overlay(sdl_renderer, 20, 500);
+	
 	while (!input.quit) {
 		Uint32 now = SDL_GetTicks();
 		Uint32 delta = now - last_ticks;
@@ -372,7 +406,7 @@ int main(int argc, char *argv[])
 
 		wf_platform_begin_ui(platform);
 
-		poll_all_input(&input, ctx);
+		poll_all_input(&input, ctx, &control_state);
 
 		mu_begin(ctx);
 		wf_control_create_panel(ctx, &control_state);

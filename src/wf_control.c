@@ -69,7 +69,7 @@ void wf_control_create_panel(mu_Context *ctx, wf_control_state_t *state)
 			mu_slider(ctx, &state->rotation_speed, -0.20f, 0.20f);
 
 			mu_label(ctx, "Distance");
-			mu_slider(ctx, &state->camera_distance, 1.0f, 10.0f);
+			mu_slider(ctx, &state->camera_distance, 1.0f, 3.0f);
 
 			mu_layout_row(ctx, 1, (int[]){ -1 }, 0);
 			if (mu_button(ctx, state->paused ? "Resume" : "Pause"))
