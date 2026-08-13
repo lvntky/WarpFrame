@@ -2,7 +2,7 @@
 
 A PS1-style software rasterizer in C. No OpenGL, no Vulkan, no GPU. Every pixel on screen was written by a loop in this repo.
 
-![first render](./docs/demo_1.gif)
+![first render](./docs/show.gif)
 
 ![C11](https://img.shields.io/badge/C-C11-blue)
 ![SDL2](https://img.shields.io/badge/SDL2-presentation%20only-informational)
